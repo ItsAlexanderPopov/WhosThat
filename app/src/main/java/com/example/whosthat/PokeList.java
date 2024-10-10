@@ -2,6 +2,7 @@ package com.example.whosthat;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PokeList {
     private static final String[] GEN1_POKEMON_ARRAY = {
@@ -23,28 +24,18 @@ public class PokeList {
     };
 
     private static final List<String> GEN1_POKEMON_LIST = Arrays.asList(GEN1_POKEMON_ARRAY);
+    private static final List<String> GEN1_POKEMON_LIST_LOWERCASE = GEN1_POKEMON_LIST.stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toList());
 
-    /**
-     * Returns an array of all Generation 1 Pokémon names.
-     * @return String array containing 151 Pokémon names
-     */
     public static String[] getGen1PokemonArray() {
-        return GEN1_POKEMON_ARRAY.clone(); // Return a clone to prevent modification of the original array
+        return GEN1_POKEMON_ARRAY.clone();
     }
 
-    /**
-     * Returns a List of all Generation 1 Pokémon names.
-     * @return List<String> containing 151 Pokémon names
-     */
     public static List<String> getGen1PokemonList() {
         return GEN1_POKEMON_LIST;
     }
 
-    /**
-     * Returns the name of a Generation 1 Pokémon by its Pokédex number.
-     * @param number The Pokédex number (1-151)
-     * @return The Pokémon's name, or null if the number is out of range
-     */
     public static String getPokemonByNumber(int number) {
         if (number < 1 || number > 151) {
             return null;
@@ -52,12 +43,28 @@ public class PokeList {
         return GEN1_POKEMON_ARRAY[number - 1];
     }
 
-    /**
-     * Checks if a given name is a Generation 1 Pokémon.
-     * @param name The name to check
-     * @return true if the name is a Gen 1 Pokémon, false otherwise
-     */
     public static boolean isGen1Pokemon(String name) {
-        return GEN1_POKEMON_LIST.contains(name);
+        return GEN1_POKEMON_LIST_LOWERCASE.contains(name.toLowerCase());
+    }
+
+    public static String normalizePokemonName(String name) {
+        return name.toLowerCase()
+                .replace("♀", "-f")
+                .replace("♂", "-m")
+                .replace("'", "")
+                .replace(". ", "-")
+                .replace(" ", "-");
+    }
+
+    public static List<String> getFormattedPokemonList() {
+        return GEN1_POKEMON_LIST;
+    }
+
+    public static String denormalizePokemonName(String normalizedName) {
+        String denormalized = normalizedName
+                .replace("-f", "♀")
+                .replace("-m", "♂")
+                .replace("-", " ");
+        return denormalized.substring(0, 1).toUpperCase() + denormalized.substring(1);
     }
 }
