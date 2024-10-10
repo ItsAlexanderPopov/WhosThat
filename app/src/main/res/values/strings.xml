@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">WhosThat</string>
+    <string name="pokemon_title_screen">WHO\'S THAT POKEMON</string>
+    <string name="lol_title_screen">WHO\'S THAT CHAMPION</string>
+</resources>
