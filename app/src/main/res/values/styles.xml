@@ -2,7 +2,7 @@
 <resources>
     <style name="CustomButtonStyle" parent="Widget.Material3.Button">
 
-        <item name="cornerRadius">4dp</item>
+        <item name="cornerRadius">8dp</item>
         <item name="android:fontFamily">@font/premier_league</item>
         <item name="android:textSize">32sp</item>
         <item name="android:letterSpacing">0.1</item>
@@ -10,8 +10,8 @@
         <item name="backgroundTint">@color/blue</item>
         <item name="android:textColor">@color/beige</item>
         <item name="rippleColor">@color/gold</item>
-        <item name="strokeColor">@color/beige</item>
-        <item name="strokeWidth">2dp</item>
+        <item name="strokeColor">@color/gold</item>
+        <item name="strokeWidth">4dp</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:paddingTop">20dp</item>
         <item name="android:paddingBottom">20dp</item>
@@ -20,7 +20,7 @@
 
     <style name="CustomAutoCompleteTextViewStyle" parent="Widget.AppCompat.Light.AutoCompleteTextView">
         <item name="android:background">@color/blue</item>
-        <item name="android:textColor">@color/beige</item>
+        <item name="android:textColor">@color/black</item>
         <item name="android:textSize">24sp</item>
         <item name="android:padding">1dp</item>
     </style>

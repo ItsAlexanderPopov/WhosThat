@@ -22,6 +22,7 @@
 
         <activity
             android:name=".PokemonPage"
+            android:launchMode="singleTop"
             android:label="Pokemon"
             android:parentActivityName=".MainActivity" />
 

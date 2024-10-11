@@ -16,6 +16,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.widget.NestedScrollView;
@@ -48,6 +49,7 @@ public class PokemonPage extends AppCompatActivity {
     private PokeApiService pokeApiService;
     private int streakCounter = 0;
     private Handler handler;
+    private boolean isInitialized = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +60,16 @@ public class PokemonPage extends AppCompatActivity {
         initializeViews();
         setupAutocomplete();
         setupButtonListener();
+        setupBackNavigation();
 
         pokeApiService = RetrofitClient.getPokeApiService();
         handler = new Handler(Looper.getMainLooper());
 
         if (savedInstanceState != null) {
             restoreState(savedInstanceState);
-        } else {
+        } else if (!isInitialized) {
             fetchRandomPokemon();
+            isInitialized = true;
         }
     }
 
@@ -77,6 +81,16 @@ public class PokemonPage extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+    }
+
+    private void setupBackNavigation() {
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                navigateToMainActivity();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     private void initializeViews() {
@@ -172,7 +186,7 @@ public class PokemonPage extends AppCompatActivity {
     }
 
     private void applyColorFilter() {
-        int color = Color.parseColor("#FFF0E6D2");
+        int color = Color.parseColor("#FF000000");
         imagePokemon.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
 
@@ -232,10 +246,15 @@ public class PokemonPage extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
+        navigateToMainActivity();
+        return true;
+    }
+
+    private void navigateToMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
-        return true;
+        // Don't finish this activity
     }
 
     @Override
@@ -244,12 +263,14 @@ public class PokemonPage extends AppCompatActivity {
         outState.putString("currentPokemonName", currentPokemonName);
         outState.putString("currentSpriteUrl", currentSpriteUrl);
         outState.putInt("streakCounter", streakCounter);
+        outState.putBoolean("isInitialized", isInitialized);
     }
 
     private void restoreState(Bundle savedInstanceState) {
         currentPokemonName = savedInstanceState.getString("currentPokemonName");
         currentSpriteUrl = savedInstanceState.getString("currentSpriteUrl");
         streakCounter = savedInstanceState.getInt("streakCounter");
+        isInitialized = savedInstanceState.getBoolean("isInitialized");
         updateStreakCounter();
         if (currentSpriteUrl != null && !currentSpriteUrl.isEmpty()) {
             showLoading();
@@ -258,6 +279,12 @@ public class PokemonPage extends AppCompatActivity {
             showContent();
         }
         Log.d(TAG, "State restored - Pokemon: " + currentPokemonName + ", Streak: " + streakCounter);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
     }
 
     @Override
