@@ -7,7 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -33,7 +33,6 @@ import com.bumptech.glide.request.target.Target;
 import java.util.List;
 
 public class PokemonPage extends AppCompatActivity {
-    private static final String TAG = "PokemonPage";
     private static final int REVEAL_DURATION = 3000; // 3 seconds
 
     private PokemonViewModel viewModel;
@@ -117,15 +116,13 @@ public class PokemonPage extends AppCompatActivity {
                     .load(url)
                     .listener(new RequestListener<Drawable>() {
                         @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            Log.e(TAG, "Image load failed", e);
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
                             Toast.makeText(PokemonPage.this, "Failed to load image", Toast.LENGTH_SHORT).show();
                             return false;
                         }
 
                         @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            Log.d(TAG, "Image loaded successfully");
+                        public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
                             applyColorFilter();
                             return false;
                         }
@@ -136,6 +133,13 @@ public class PokemonPage extends AppCompatActivity {
 
     private void confirmPokemon() {
         String enteredName = inputPokemon.getText().toString().trim();
+        // delete this in production
+        if(enteredName.equals("next")){
+            String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentPokemonName().getValue());
+            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
+            revealPokemon();
+            return;
+        }
 
         if (!PokeList.isGen1Pokemon(enteredName)) {
             Toast.makeText(this, "Not Gen-1 Pokemon Name", Toast.LENGTH_SHORT).show();
@@ -166,7 +170,7 @@ public class PokemonPage extends AppCompatActivity {
     }
 
     private void updateStreakCounter(int streak) {
-        streakCounterTextView.setText("Streak: " + streak);
+        streakCounterTextView.setText(String.valueOf(streak));
     }
 
     private void updateLoadingState(boolean isLoading) {
@@ -199,7 +203,7 @@ public class PokemonPage extends AppCompatActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
+    protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
     }
@@ -207,7 +211,6 @@ public class PokemonPage extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume called - Current Pokemon: " + viewModel.getCurrentPokemonName().getValue());
     }
 
     @Override
