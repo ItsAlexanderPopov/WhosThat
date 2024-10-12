@@ -31,6 +31,8 @@ import com.bumptech.glide.request.target.Target;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
 import com.example.whosthat.HighScoreManager;
+import com.example.whosthat.pokemon.PokeList;
+
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import java.util.List;
@@ -163,11 +165,19 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private void confirmChampion() {
         String enteredName = inputChampion.getText().toString().trim();
 
+        // delete this in production
+        if(enteredName.equals("next")){
+            String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentChampionName().getValue());
+            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
+            revealChampion();
+            highScoreManager.unlockSecretAchievement();
+            return;
+        }
+
         if (!ChampionList.isValidChampion(enteredName)) {
             Toast.makeText(this, "Not a valid champion name", Toast.LENGTH_SHORT).show();
             return;
         }
-
         currentAttempts++;
         boolean isCorrect = viewModel.checkGuess(enteredName);
         if (isCorrect) {

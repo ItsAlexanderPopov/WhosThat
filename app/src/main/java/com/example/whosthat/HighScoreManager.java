@@ -7,6 +7,7 @@ public class HighScoreManager {
     private static final String PREF_NAME = "HighScores";
     private static final String KEY_STREAK_POKE = "HighStreakPokemon";
     private static final String KEY_STREAK_LOL = "HighStreakLeagueOfLegends";
+    private static final String KEY_SECRET_ACHIEVEMENT = "SecretAchievement";
 
     private SharedPreferences prefs;
 
@@ -22,6 +23,10 @@ public class HighScoreManager {
         return prefs.getInt(KEY_STREAK_LOL, 0);
     }
 
+    public boolean isSecretAchievementUnlocked() {
+        return prefs.getBoolean(KEY_SECRET_ACHIEVEMENT, false);
+    }
+
     public void updateHighStreakPokemon(int newStreak) {
         int currentStreak = getHighStreakPokemon();
         if (newStreak > currentStreak) {
@@ -34,6 +39,12 @@ public class HighScoreManager {
         if (newStreak > currentStreak) {
             saveHighStreakLeagueOfLegends(newStreak);
         }
+    }
+
+    public void unlockSecretAchievement() {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(KEY_SECRET_ACHIEVEMENT, true);
+        editor.apply();
     }
 
     private void saveHighStreakPokemon(int streak) {

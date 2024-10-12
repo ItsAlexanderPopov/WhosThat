@@ -143,6 +143,7 @@ public class PokemonPage extends AppCompatActivity {
             String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentPokemonName().getValue());
             Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
             revealPokemon();
+            highScoreManager.unlockSecretAchievement();
             return;
         }
 

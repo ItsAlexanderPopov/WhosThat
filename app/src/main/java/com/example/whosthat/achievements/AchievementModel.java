@@ -6,6 +6,7 @@ public class AchievementModel {
     private boolean isUnlocked;
     private int requiredScore;
     private String gameType;
+    private String imageResource;
 
     public AchievementModel(String iconName, String description, int requiredScore, String gameType) {
         this.iconName = iconName;
@@ -22,4 +23,14 @@ public class AchievementModel {
     public void setUnlocked(boolean unlocked) { isUnlocked = unlocked; }
     public int getRequiredScore() { return requiredScore; }
     public String getGameType() { return gameType; }
+
+    public void setImageResource(String imageResource) {
+        this.imageResource = imageResource;
+    }
+    public String getImageResource() {
+        return imageResource;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

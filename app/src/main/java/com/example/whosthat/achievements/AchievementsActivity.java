@@ -69,19 +69,33 @@ public class AchievementsActivity extends AppCompatActivity {
         achievementModelList.add(new AchievementModel("i10poke", "Score 10 streak points in Pokemon", 10, "poke"));
         achievementModelList.add(new AchievementModel("i15poke", "Score 15 streak points in Pokemon", 15, "poke"));
         achievementModelList.add(new AchievementModel("i20poke", "Score 20 streak points in Pokemon", 20, "poke"));
-        achievementModelList.add(new AchievementModel("secret", "Secret Achievement", 1, "secret"));
+        // Add the secret achievement
+        achievementModelList.add(new AchievementModel("secret", "Secret Achievement", 0, "secret"));
         return achievementModelList;
     }
 
     private void updateAchievements() {
         int pokemonScore = highScoreManager.getHighStreakPokemon();
         int lolScore = highScoreManager.getHighStreakLeagueOfLegends();
+        boolean isSecretUnlocked = highScoreManager.isSecretAchievementUnlocked();
 
         for (AchievementModel achievementModel : achievementModels) {
-            if (achievementModel.getGameType().equals("poke")) {
-                achievementModel.setUnlocked(pokemonScore >= achievementModel.getRequiredScore());
-            } else if (achievementModel.getGameType().equals("lol")) {
-                achievementModel.setUnlocked(lolScore >= achievementModel.getRequiredScore());
+            switch (achievementModel.getGameType()) {
+                case "poke":
+                    achievementModel.setUnlocked(pokemonScore >= achievementModel.getRequiredScore());
+                    break;
+                case "lol":
+                    achievementModel.setUnlocked(lolScore >= achievementModel.getRequiredScore());
+                    break;
+                case "secret":
+                    achievementModel.setUnlocked(isSecretUnlocked);
+                    if (isSecretUnlocked) {
+                        achievementModel.setImageResource("next.png");
+                        achievementModel.setDescription("Discover secret keyword of \"next\"");
+                    } else {
+                        achievementModel.setImageResource("secret.png");
+                    }
+                    break;
             }
         }
     }
