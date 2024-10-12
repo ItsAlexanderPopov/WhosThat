@@ -1,13 +1,13 @@
-package com.example.whosthat;
+package com.example.whosthat.achievements;
 
-public class Achievement {
+public class AchievementModel {
     private String iconName;
     private String description;
     private boolean isUnlocked;
     private int requiredScore;
     private String gameType;
 
-    public Achievement(String iconName, String description, int requiredScore, String gameType) {
+    public AchievementModel(String iconName, String description, int requiredScore, String gameType) {
         this.iconName = iconName;
         this.description = description;
         this.requiredScore = requiredScore;

@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.achievements;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,19 +8,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.whosthat.R;
 import com.google.android.material.card.MaterialCardView;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.ViewHolder> {
-    private List<Achievement> achievements;
+    private List<AchievementModel> achievementModels;
     private Context context;
     private Map<String, Integer> iconResourceMap;
 
-    public AchievementAdapter(Context context, List<Achievement> achievements) {
+    public AchievementAdapter(Context context, List<AchievementModel> achievementModels) {
         this.context = context;
-        this.achievements = achievements;
+        this.achievementModels = achievementModels;
         initializeIconResourceMap();
     }
 
@@ -44,10 +46,10 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Achievement achievement = achievements.get(position);
-        holder.descriptionView.setText(achievement.getDescription());
+        AchievementModel achievementModel = achievementModels.get(position);
+        holder.descriptionView.setText(achievementModel.getDescription());
 
-        Integer resourceId = iconResourceMap.get(achievement.getIconName());
+        Integer resourceId = iconResourceMap.get(achievementModel.getIconName());
         if (resourceId != null) {
             holder.iconView.setImageResource(resourceId);
         } else {
@@ -56,7 +58,7 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
         }
 
         MaterialCardView cardView = (MaterialCardView) holder.itemView;
-        if (achievement.isUnlocked()) {
+        if (achievementModel.isUnlocked()) {
             cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.blue));
             holder.iconView.setColorFilter(null);
             holder.descriptionView.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -69,7 +71,7 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
     @Override
     public int getItemCount() {
-        return achievements.size();
+        return achievementModels.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

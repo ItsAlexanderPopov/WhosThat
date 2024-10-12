@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.achievements;
 
 import android.os.Bundle;
 import androidx.activity.OnBackPressedCallback;
@@ -6,13 +6,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.whosthat.HighScoreManager;
+import com.example.whosthat.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class AchievementsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private AchievementAdapter adapter;
-    private List<Achievement> achievements;
+    private List<AchievementModel> achievementModels;
     private HighScoreManager highScoreManager;
 
     @Override
@@ -42,10 +46,10 @@ public class AchievementsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         highScoreManager = new HighScoreManager(this);
-        achievements = createAchievements();
+        achievementModels = createAchievements();
         updateAchievements();
 
-        adapter = new AchievementAdapter(this, achievements);
+        adapter = new AchievementAdapter(this, achievementModels);
         recyclerView.setAdapter(adapter);
     }
 
@@ -55,29 +59,29 @@ public class AchievementsActivity extends AppCompatActivity {
         return true;
     }
 
-    private List<Achievement> createAchievements() {
-        List<Achievement> achievementList = new ArrayList<>();
-        achievementList.add(new Achievement("i5lol", "Score 5 streak points in League of Legends", 5, "lol"));
-        achievementList.add(new Achievement("i10lol", "Score 10 streak points in League of Legends", 10, "lol"));
-        achievementList.add(new Achievement("i15lol", "Score 15 streak points in League of Legends", 15, "lol"));
-        achievementList.add(new Achievement("i20lol", "Score 20 streak points in League of Legends", 20, "lol"));
-        achievementList.add(new Achievement("i5poke", "Score 5 streak points in Pokemon", 5, "poke"));
-        achievementList.add(new Achievement("i10poke", "Score 10 streak points in Pokemon", 10, "poke"));
-        achievementList.add(new Achievement("i15poke", "Score 15 streak points in Pokemon", 15, "poke"));
-        achievementList.add(new Achievement("i20poke", "Score 20 streak points in Pokemon", 20, "poke"));
-        achievementList.add(new Achievement("secret", "Secret Achievement", 1, "secret"));
-        return achievementList;
+    private List<AchievementModel> createAchievements() {
+        List<AchievementModel> achievementModelList = new ArrayList<>();
+        achievementModelList.add(new AchievementModel("i5lol", "Score 5 streak points in League of Legends", 5, "lol"));
+        achievementModelList.add(new AchievementModel("i10lol", "Score 10 streak points in League of Legends", 10, "lol"));
+        achievementModelList.add(new AchievementModel("i15lol", "Score 15 streak points in League of Legends", 15, "lol"));
+        achievementModelList.add(new AchievementModel("i20lol", "Score 20 streak points in League of Legends", 20, "lol"));
+        achievementModelList.add(new AchievementModel("i5poke", "Score 5 streak points in Pokemon", 5, "poke"));
+        achievementModelList.add(new AchievementModel("i10poke", "Score 10 streak points in Pokemon", 10, "poke"));
+        achievementModelList.add(new AchievementModel("i15poke", "Score 15 streak points in Pokemon", 15, "poke"));
+        achievementModelList.add(new AchievementModel("i20poke", "Score 20 streak points in Pokemon", 20, "poke"));
+        achievementModelList.add(new AchievementModel("secret", "Secret Achievement", 1, "secret"));
+        return achievementModelList;
     }
 
     private void updateAchievements() {
         int pokemonScore = highScoreManager.getHighScorePoke();
         int lolScore = highScoreManager.getHighScoreLeagueOfLegends();
 
-        for (Achievement achievement : achievements) {
-            if (achievement.getGameType().equals("poke")) {
-                achievement.setUnlocked(pokemonScore >= achievement.getRequiredScore());
-            } else if (achievement.getGameType().equals("lol")) {
-                achievement.setUnlocked(lolScore >= achievement.getRequiredScore());
+        for (AchievementModel achievementModel : achievementModels) {
+            if (achievementModel.getGameType().equals("poke")) {
+                achievementModel.setUnlocked(pokemonScore >= achievementModel.getRequiredScore());
+            } else if (achievementModel.getGameType().equals("lol")) {
+                achievementModel.setUnlocked(lolScore >= achievementModel.getRequiredScore());
             }
         }
     }

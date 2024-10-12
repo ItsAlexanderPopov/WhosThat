@@ -33,7 +33,7 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
-            android:name=".AchievementsActivity"
+            android:name=".achievements.AchievementsActivity"
             android:label="Achievements"
             android:parentActivityName=".MainActivity"
             />
