@@ -36,6 +36,8 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
         iconResourceMap.put("i10poke", R.drawable.i10poke);
         iconResourceMap.put("i15poke", R.drawable.i15poke);
         iconResourceMap.put("i20poke", R.drawable.i20poke);
+        iconResourceMap.put("secret", R.drawable.secret);
+        iconResourceMap.put("next", R.drawable.next);
     }
 
     @Override
@@ -49,7 +51,12 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
         AchievementModel achievementModel = achievementModels.get(position);
         holder.descriptionView.setText(achievementModel.getDescription());
 
-        Integer resourceId = iconResourceMap.get(achievementModel.getIconName());
+        String iconName = achievementModel.getIconName();
+        if (achievementModel.getGameType().equals("secret")) {
+            iconName = achievementModel.isUnlocked() ? "next" : "secret";
+        }
+
+        Integer resourceId = iconResourceMap.get(iconName);
         if (resourceId != null) {
             holder.iconView.setImageResource(resourceId);
         } else {
@@ -83,5 +90,10 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
             iconView = itemView.findViewById(R.id.achievement_icon);
             descriptionView = itemView.findViewById(R.id.achievement_description);
         }
+    }
+
+    public void updateAchievements(List<AchievementModel> newAchievements) {
+        this.achievementModels = newAchievements;
+        notifyDataSetChanged();
     }
 }

@@ -47,10 +47,10 @@ public class AchievementsActivity extends AppCompatActivity {
 
         highScoreManager = new HighScoreManager(this);
         achievementModels = createAchievements();
-        updateAchievements();
-
         adapter = new AchievementAdapter(this, achievementModels);
         recyclerView.setAdapter(adapter);
+
+        updateAchievements();
     }
 
     @Override
@@ -90,13 +90,16 @@ public class AchievementsActivity extends AppCompatActivity {
                 case "secret":
                     achievementModel.setUnlocked(isSecretUnlocked);
                     if (isSecretUnlocked) {
-                        achievementModel.setImageResource("next.png");
+                        achievementModel.setIconName("next");
                         achievementModel.setDescription("Discover secret keyword of \"next\"");
                     } else {
-                        achievementModel.setImageResource("secret.png");
+                        achievementModel.setIconName("secret");
                     }
                     break;
             }
         }
+
+        // Notify the adapter that the data has changed
+        adapter.updateAchievements(achievementModels);
     }
 }
