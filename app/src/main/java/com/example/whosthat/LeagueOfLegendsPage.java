@@ -34,7 +34,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import java.util.List;
 
 public class LeagueOfLegendsPage extends AppCompatActivity {
-    private static final int REVEAL_DURATION = 3000;
+    private static final int REVEAL_DURATION = 1000;
     private static final int BLUR_SAMPLING = 4;
 
     private LeagueOfLegendsViewModel viewModel;
@@ -62,7 +62,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         handler = new Handler(Looper.getMainLooper());
 
         if (savedInstanceState == null) {
-            viewModel.fetchRandomChampion();
+            viewModel.loadChampionList();
         }
     }
 
@@ -100,6 +100,11 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         viewModel.getCurrentBlurRadius().observe(this, blurRadius -> {
             loadImage(viewModel.getCurrentSplashArtUrl().getValue());
         });
+        viewModel.getIsChampionListLoaded().observe(this, isLoaded -> {
+            if (isLoaded) {
+                viewModel.fetchRandomChampion();
+            }
+        });
     }
 
     private void setupBackNavigation() {
@@ -118,7 +123,6 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         inputChampion.setAdapter(adapter);
         inputChampion.setThreshold(1);
     }
-
 
     private void loadImage(String url) {
         if (url != null && !url.isEmpty()) {
@@ -148,6 +152,14 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
 
     private void confirmChampion() {
         String enteredName = inputChampion.getText().toString().trim();
+        // delete this in production
+        if(enteredName.equals("next")){
+            String displayName = viewModel.getCurrentChampionName().getValue();
+            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
+            revealChampion();
+            return;
+        }
+
         if (!ChampionList.isValidChampion(enteredName)) {
             Toast.makeText(this, "Not a valid champion name", Toast.LENGTH_SHORT).show();
             return;
@@ -160,7 +172,6 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();
             viewModel.reduceBlurRadius();
-            // The image will be reloaded automatically due to the LiveData observer
         }
     }
 

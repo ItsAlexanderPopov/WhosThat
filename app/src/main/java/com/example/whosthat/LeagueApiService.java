@@ -8,6 +8,6 @@ public interface LeagueApiService {
     @GET("data/en_US/champion.json")
     Call<LeagueChampionModel.ChampionList> getChampionList();
 
-    @GET("img/champion/splash/{championId}_0.jpg")
-    Call<Void> getChampionSplashArt(@Path("championId") String championId);
+    @GET("data/en_US/champion/{championId}.json")
+    Call<LeagueChampionModel> getChampionData(@Path("championId") String championId);
 }

@@ -7,10 +7,10 @@ import java.util.Map;
 public class ChampionList {
     private static List<String> championNames = new ArrayList<>();
 
-    public static void initialize(Map<String, LeagueChampionModel> champions) {
+    public static void initialize(Map<String, LeagueChampionModel.ChampionData> champions) {
         championNames.clear();
-        for (LeagueChampionModel champion : champions.values()) {
-            championNames.add(champion.name);
+        for (LeagueChampionModel.ChampionData champion : champions.values()) {
+            championNames.add(champion.getName());
         }
     }
 
