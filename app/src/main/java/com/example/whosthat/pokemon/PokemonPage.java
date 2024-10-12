@@ -31,6 +31,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
+import com.example.whosthat.HighScoreManager;
 
 import java.util.List;
 
@@ -45,11 +46,13 @@ public class PokemonPage extends AppCompatActivity {
     private NestedScrollView contentContainer;
     private TextView streakCounterTextView;
     private Handler handler;
+    private HighScoreManager highScoreManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pokemon);
+        highScoreManager = new HighScoreManager(this);
 
         viewModel = new ViewModelProvider(this, new PokemonViewModelFactory(PokemonRetrofitClient.getPokeApiService()))
                 .get(PokemonViewModel.class);
@@ -152,6 +155,8 @@ public class PokemonPage extends AppCompatActivity {
         if (isCorrect) {
             String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentPokemonName().getValue());
             Toast.makeText(this, "Correct! It's " + displayName + "!", Toast.LENGTH_SHORT).show();
+            int currentStreak = viewModel.getStreakCounter().getValue();
+            highScoreManager.updateHighStreakPokemon(currentStreak);
             revealPokemon();
         } else {
             Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();

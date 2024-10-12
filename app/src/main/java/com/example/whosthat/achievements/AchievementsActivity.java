@@ -74,8 +74,8 @@ public class AchievementsActivity extends AppCompatActivity {
     }
 
     private void updateAchievements() {
-        int pokemonScore = highScoreManager.getHighScorePoke();
-        int lolScore = highScoreManager.getHighScoreLeagueOfLegends();
+        int pokemonScore = highScoreManager.getHighStreakPokemon();
+        int lolScore = highScoreManager.getHighStreakLeagueOfLegends();
 
         for (AchievementModel achievementModel : achievementModels) {
             if (achievementModel.getGameType().equals("poke")) {

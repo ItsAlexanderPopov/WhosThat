@@ -59,7 +59,7 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
 
         MaterialCardView cardView = (MaterialCardView) holder.itemView;
         if (achievementModel.isUnlocked()) {
-            cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.blue));
+            cardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.gold));
             holder.iconView.setColorFilter(null);
             holder.descriptionView.setTextColor(ContextCompat.getColor(context, R.color.black));
         } else {

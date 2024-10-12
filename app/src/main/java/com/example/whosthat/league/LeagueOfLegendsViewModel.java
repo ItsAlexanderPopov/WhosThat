@@ -15,8 +15,8 @@ import retrofit2.Response;
 
 public class LeagueOfLegendsViewModel extends ViewModel {
     private static final String TAG = "LeagueViewModel";
-    private static final int INITIAL_BLUR_RADIUS = 21;
-    private static final int BLUR_REDUCTION_STEP = 5;
+    private static final int INITIAL_BLUR_RADIUS = 16;
+    private static final int BLUR_REDUCTION_STEP = 4;
     private static final int MIN_BLUR_RADIUS = 1;
 
     private final MutableLiveData<String> currentChampionName = new MutableLiveData<>();
@@ -197,10 +197,8 @@ public class LeagueOfLegendsViewModel extends ViewModel {
         }
 
         if (guess.equalsIgnoreCase(currentChampion)) {
-            increaseStreak();
             return true;
         } else {
-            resetStreak();
             return false;
         }
     }

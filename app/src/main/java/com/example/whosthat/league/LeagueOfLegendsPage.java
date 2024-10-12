@@ -30,7 +30,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
-
+import com.example.whosthat.HighScoreManager;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import java.util.List;
@@ -50,12 +50,14 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private TextView streakCounterTextView;
     private TextView attemptsLeftTextView;
     private Handler handler;
+    private HighScoreManager highScoreManager;
     private int currentAttempts = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leagueoflegends);
+        highScoreManager = new HighScoreManager(this);
 
         viewModel = new ViewModelProvider(this, new LeagueViewModelFactory(LeagueRetrofitClient.getLeagueApiService()))
                 .get(LeagueOfLegendsViewModel.class);
@@ -171,6 +173,8 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         if (isCorrect) {
             Toast.makeText(this, "Correct! It's " + enteredName + "!", Toast.LENGTH_SHORT).show();
             viewModel.increaseStreak();
+            int currentStreak = viewModel.getStreakCounter().getValue();
+            highScoreManager.updateHighStreakLeagueOfLegends(currentStreak);
             revealChampion();
         } else {
             if (currentAttempts > MAX_ATTEMPTS) {

@@ -81,6 +81,7 @@
                     android:layout_marginTop="16dp"
                     android:src="@drawable/placeholder"
                     android:scaleType="centerCrop"
+                    android:background="@color/beige"
                     app:layout_constraintTop_toBottomOf="@id/streak_counter"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
