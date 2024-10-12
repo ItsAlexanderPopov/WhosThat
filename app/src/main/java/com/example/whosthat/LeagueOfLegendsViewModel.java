@@ -18,7 +18,7 @@ import retrofit2.Response;
 
 public class LeagueOfLegendsViewModel extends ViewModel {
     private static final String TAG = "LeagueViewModel";
-    private static final int INITIAL_BLUR_RADIUS = 25;
+    private static final int INITIAL_BLUR_RADIUS = 21;
     private static final int BLUR_REDUCTION_STEP = 5;
     private static final int MIN_BLUR_RADIUS = 1;
 
