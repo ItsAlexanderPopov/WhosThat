@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.league;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;

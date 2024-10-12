@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.league;
 
 import android.util.Log;
 import androidx.lifecycle.LiveData;
@@ -8,9 +8,6 @@ import androidx.lifecycle.ViewModel;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.net.URLEncoder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -214,7 +211,7 @@ public class LeagueOfLegendsViewModel extends ViewModel {
         currentBlurRadius.setValue(newRadius);
     }
 
-    private void increaseStreak() {
+    public void increaseStreak() {
         Integer currentStreak = streakCounter.getValue();
         streakCounter.setValue(currentStreak != null ? currentStreak + 1 : 1);
     }

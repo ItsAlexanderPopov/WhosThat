@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import com.google.gson.annotations.SerializedName;
 

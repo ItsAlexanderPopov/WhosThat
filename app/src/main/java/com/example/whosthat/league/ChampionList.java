@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.league;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.league;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -28,6 +28,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.example.whosthat.MainActivity;
+import com.example.whosthat.R;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
@@ -36,6 +38,8 @@ import java.util.List;
 public class LeagueOfLegendsPage extends AppCompatActivity {
     private static final int REVEAL_DURATION = 1000;
     private static final int BLUR_SAMPLING = 4;
+    private static final int MAX_ATTEMPTS = 3;
+
 
     private LeagueOfLegendsViewModel viewModel;
     private ImageView imageChampion;
@@ -44,7 +48,9 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private ProgressBar loadingIndicator;
     private NestedScrollView contentContainer;
     private TextView streakCounterTextView;
+    private TextView attemptsLeftTextView;
     private Handler handler;
+    private int currentAttempts = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,8 +79,10 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         loadingIndicator = findViewById(R.id.loading_indicator);
         contentContainer = findViewById(R.id.content_container);
         streakCounterTextView = findViewById(R.id.streak_counter);
+        attemptsLeftTextView = findViewById(R.id.attempts_left);
 
         buttonConfirmChampion.setOnClickListener(v -> confirmChampion());
+        updateAttemptsLeftText();
     }
 
     private void setupToolbar() {
@@ -152,26 +160,29 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
 
     private void confirmChampion() {
         String enteredName = inputChampion.getText().toString().trim();
-        // delete this in production
-        if(enteredName.equals("next")){
-            String displayName = viewModel.getCurrentChampionName().getValue();
-            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
-            revealChampion();
-            return;
-        }
 
         if (!ChampionList.isValidChampion(enteredName)) {
             Toast.makeText(this, "Not a valid champion name", Toast.LENGTH_SHORT).show();
             return;
         }
 
+        currentAttempts++;
         boolean isCorrect = viewModel.checkGuess(enteredName);
         if (isCorrect) {
             Toast.makeText(this, "Correct! It's " + enteredName + "!", Toast.LENGTH_SHORT).show();
+            viewModel.increaseStreak();
             revealChampion();
         } else {
-            Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();
-            viewModel.reduceBlurRadius();
+            if (currentAttempts > MAX_ATTEMPTS) {
+                String correctName = viewModel.getCurrentChampionName().getValue();
+                Toast.makeText(this, "Wrong! It was " + correctName, Toast.LENGTH_LONG).show();
+                viewModel.resetStreak();
+                revealChampion();
+            } else {
+                Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();
+                viewModel.reduceBlurRadius();
+                updateAttemptsLeftText();
+            }
         }
     }
 
@@ -189,8 +200,13 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             buttonConfirmChampion.setEnabled(true);
             inputChampion.setEnabled(true);
             inputChampion.setText("");
+            currentAttempts = 0;
+            updateAttemptsLeftText();
         }, REVEAL_DURATION);
     }
+
+    private void updateAttemptsLeftText() {
+        attemptsLeftTextView.setText(String.valueOf(MAX_ATTEMPTS - currentAttempts));    }
 
     private void updateStreakCounter(int streak) {
         streakCounterTextView.setText(String.valueOf(streak));

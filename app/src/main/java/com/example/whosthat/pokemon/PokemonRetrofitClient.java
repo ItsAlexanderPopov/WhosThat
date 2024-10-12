@@ -1,13 +1,13 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class LeagueRetrofitClient {
-    private static final String BASE_URL = "https://ddragon.leagueoflegends.com/cdn/14.20.1/";
+public class PokemonRetrofitClient {
+    private static final String BASE_URL = "https://pokeapi.co/api/v2/";
     private static Retrofit retrofit = null;
 
-    private LeagueRetrofitClient() {
+    private PokemonRetrofitClient() {
         // Private constructor to prevent instantiation
     }
 
@@ -21,7 +21,7 @@ public class LeagueRetrofitClient {
         return retrofit;
     }
 
-    public static LeagueApiService getLeagueApiService() {
-        return getClient().create(LeagueApiService.class);
+    public static PokeApiService getPokeApiService() {
+        return getClient().create(PokeApiService.class);
     }
 }

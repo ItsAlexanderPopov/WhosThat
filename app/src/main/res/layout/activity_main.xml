@@ -19,4 +19,11 @@
         android:layout_height="wrap_content"
         android:text="@string/lol_title_screen" />
 
+    <Button
+        android:id="@+id/button_achievements"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="@string/achievements" />
+
 </LinearLayout>

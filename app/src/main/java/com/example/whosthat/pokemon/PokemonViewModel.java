@@ -1,9 +1,8 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.annotation.Nullable;
 
 import java.util.Random;
 

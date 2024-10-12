@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -2,4 +2,12 @@
     <string name="app_name">WhosThat</string>
     <string name="pokemon_title_screen">WHO\'S THAT POKEMON</string>
     <string name="lol_title_screen">WHO\'S THAT CHAMPION</string>
+    <string name="achievements">Achievements</string>
+    <string name="zero">0</string>
+    <string name="three">3</string>
+    <string name="enter_champion_name">Enter Champion name</string>
+    <string name="confirm">Confirm</string>
+    <string name="whos_that_champion">Who\'s that Champion?</string>
+    <string name="enter_pokemon_name">Enter Pokemon name</string>
+    <string name="whos_that_pokemon">Who\'s that Pokemon?</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import java.util.Arrays;
 import java.util.List;

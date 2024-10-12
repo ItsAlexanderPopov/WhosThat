@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -29,6 +29,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.whosthat.MainActivity;
+import com.example.whosthat.R;
 
 import java.util.List;
 
@@ -49,7 +51,7 @@ public class PokemonPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pokemon);
 
-        viewModel = new ViewModelProvider(this, new PokemonViewModelFactory(RetrofitClient.getPokeApiService()))
+        viewModel = new ViewModelProvider(this, new PokemonViewModelFactory(PokemonRetrofitClient.getPokeApiService()))
                 .get(PokemonViewModel.class);
 
         initializeViews();

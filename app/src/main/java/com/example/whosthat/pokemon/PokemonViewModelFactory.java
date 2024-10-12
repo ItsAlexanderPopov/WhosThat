@@ -1,4 +1,4 @@
-package com.example.whosthat;
+package com.example.whosthat.pokemon;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
