@@ -183,7 +183,7 @@ public class LeagueOfLegendsViewModel extends ViewModel {
                 return "Velkoz";
             case "wukong":
                 return "MonkeyKing";
-            case "renata glasc":
+            case "renataglasc":
                 return "Renata";
             default:
                 return encodedName.substring(0, 1).toUpperCase() + encodedName.substring(1);
