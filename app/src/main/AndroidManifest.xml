@@ -28,9 +28,15 @@
 
         <activity
             android:name=".league.LeagueOfLegendsPage"
+            android:launchMode="singleTop"
             android:label="League of Legends"
             android:parentActivityName=".MainActivity" />
 
+        <activity
+            android:name=".AchievementsActivity"
+            android:label="Achievements"
+            android:parentActivityName=".MainActivity"
+            />
     </application>
 
 </manifest>
