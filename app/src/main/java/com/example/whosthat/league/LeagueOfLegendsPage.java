@@ -1,6 +1,7 @@
 package com.example.whosthat.league;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,7 +24,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
@@ -34,14 +37,14 @@ import com.example.whosthat.HighScoreManager;
 import com.example.whosthat.pokemon.PokeList;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
+import jp.wasabeef.glide.transformations.GrayscaleTransformation;
 
 import java.util.List;
 
 public class LeagueOfLegendsPage extends AppCompatActivity {
     private static final int REVEAL_DURATION = 1000;
-    private static final int BLUR_SAMPLING = 4;
+    private static final int BLUR_SAMPLING = 3;
     private static final int MAX_ATTEMPTS = 3;
-
 
     private LeagueOfLegendsViewModel viewModel;
     private ImageView imageChampion;
@@ -100,7 +103,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     }
 
     private void setupObservers() {
-        viewModel.getCurrentSplashArtUrl().observe(this, this::loadImage);
+        viewModel.getCurrentChampionPortraitUrl().observe(this, this::loadImage);
         viewModel.getStreakCounter().observe(this, this::updateStreakCounter);
         viewModel.getIsLoading().observe(this, this::updateLoadingState);
         viewModel.getErrorMessage().observe(this, this::showError);
@@ -110,7 +113,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             }
         });
         viewModel.getCurrentBlurRadius().observe(this, blurRadius -> {
-            loadImage(viewModel.getCurrentSplashArtUrl().getValue());
+            loadImage(viewModel.getCurrentChampionPortraitUrl().getValue());
         });
         viewModel.getIsChampionListLoaded().observe(this, isLoaded -> {
             if (isLoaded) {
@@ -142,9 +145,16 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             if (currentBlurRadius == null) {
                 currentBlurRadius = 1; // Fallback to minimum blur if null
             }
+
+            MultiTransformation<Bitmap> multiTransformation = new MultiTransformation<>(
+                    new CenterCrop(),
+                    new BlurTransformation(currentBlurRadius, BLUR_SAMPLING),
+                    new GrayscaleTransformation()
+            );
+
             Glide.with(this)
                     .load(url)
-                    .apply(RequestOptions.bitmapTransform(new BlurTransformation(currentBlurRadius, BLUR_SAMPLING)))
+                    .apply(RequestOptions.bitmapTransform(multiTransformation))
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -161,6 +171,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
                     .into(imageChampion);
         }
     }
+
 
     private void confirmChampion() {
         String enteredName = inputChampion.getText().toString().trim();
@@ -187,7 +198,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             highScoreManager.updateHighStreakLeagueOfLegends(currentStreak);
             revealChampion();
         } else {
-            if (currentAttempts > MAX_ATTEMPTS) {
+            if (currentAttempts >= MAX_ATTEMPTS) {
                 String correctName = viewModel.getCurrentChampionName().getValue();
                 Toast.makeText(this, "Wrong! It was " + correctName, Toast.LENGTH_LONG).show();
                 viewModel.resetStreak();
@@ -202,7 +213,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
 
     private void revealChampion() {
         Glide.with(this)
-                .load(viewModel.getCurrentSplashArtUrl().getValue())
+                .load(viewModel.getCurrentChampionPortraitUrl().getValue())
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .into(imageChampion);
 
@@ -211,6 +222,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
 
         handler.postDelayed(() -> {
             viewModel.fetchRandomChampion();
+            viewModel.resetBlurRadius();
             buttonConfirmChampion.setEnabled(true);
             inputChampion.setEnabled(true);
             inputChampion.setText("");
@@ -219,8 +231,10 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         }, REVEAL_DURATION);
     }
 
+
     private void updateAttemptsLeftText() {
-        attemptsLeftTextView.setText(String.valueOf(MAX_ATTEMPTS - currentAttempts));    }
+        attemptsLeftTextView.setText(String.valueOf(MAX_ATTEMPTS - currentAttempts));
+    }
 
     private void updateStreakCounter(int streak) {
         streakCounterTextView.setText(String.valueOf(streak));

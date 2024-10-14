@@ -15,12 +15,12 @@ import retrofit2.Response;
 
 public class LeagueOfLegendsViewModel extends ViewModel {
     private static final String TAG = "LeagueViewModel";
-    private static final int INITIAL_BLUR_RADIUS = 16;
-    private static final int BLUR_REDUCTION_STEP = 4;
+    private static final int INITIAL_BLUR_RADIUS = 70;
+    private static final int BLUR_REDUCTION_STEP = 15;
     private static final int MIN_BLUR_RADIUS = 1;
 
     private final MutableLiveData<String> currentChampionName = new MutableLiveData<>();
-    private final MutableLiveData<String> currentSplashArtUrl = new MutableLiveData<>();
+    private final MutableLiveData<String> currentChampionPortraitUrl = new MutableLiveData<>();
     private final MutableLiveData<Integer> streakCounter = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -35,7 +35,7 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     }
 
     public LiveData<String> getCurrentChampionName() { return currentChampionName; }
-    public LiveData<String> getCurrentSplashArtUrl() { return currentSplashArtUrl; }
+    public LiveData<String> getCurrentChampionPortraitUrl() { return currentChampionPortraitUrl; }
     public LiveData<Integer> getStreakCounter() { return streakCounter; }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
@@ -117,20 +117,13 @@ public class LeagueOfLegendsViewModel extends ViewModel {
                     Map<String, LeagueChampionModel.ChampionData> championDataMap = response.body().getData();
                     if (championDataMap != null && !championDataMap.isEmpty()) {
                         LeagueChampionModel.ChampionData championData = championDataMap.values().iterator().next();
-                        List<LeagueChampionModel.Skin> skins = championData.getSkins();
-                        if (skins != null && !skins.isEmpty()) {
-                            int randomSkinIndex = random.nextInt(skins.size());
-                            String skinNum = String.valueOf(skins.get(randomSkinIndex).getNum());
 
-                            String splashArtUrl = String.format("https://ddragon.leagueoflegends.com/cdn/img/champion/splash/%s_%s.jpg", encodedChampionName, skinNum);
-                            Log.d(TAG, "Splash art URL: " + splashArtUrl);
-                            currentSplashArtUrl.setValue(splashArtUrl);
+                        // Construct the URL for the champion's portrait
+                        String portraitUrl = String.format("https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/%s.png", encodedChampionName);
+                        Log.d(TAG, "Champion portrait URL: " + portraitUrl);
+                        currentChampionPortraitUrl.setValue(portraitUrl);
 
-                            currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
-                        } else {
-                            Log.e(TAG, "No skins found for champion: " + championName);
-                            errorMessage.setValue("No skins found for champion: " + championName);
-                        }
+                        currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
                     } else {
                         Log.e(TAG, "Champion data is empty for: " + championName);
                         errorMessage.setValue("Champion data is empty for: " + championName);
@@ -163,6 +156,8 @@ public class LeagueOfLegendsViewModel extends ViewModel {
                 return "Belveth";
             case "chogath":
                 return "Chogath";
+            case "leblanc":
+                return "Leblanc";
             case "drmundo":
                 return "DrMundo";
             case "jarvaniv":
@@ -207,6 +202,10 @@ public class LeagueOfLegendsViewModel extends ViewModel {
         int currentRadius = currentBlurRadius.getValue() != null ? currentBlurRadius.getValue() : INITIAL_BLUR_RADIUS;
         int newRadius = Math.max(MIN_BLUR_RADIUS, currentRadius - BLUR_REDUCTION_STEP);
         currentBlurRadius.setValue(newRadius);
+    }
+
+    public void resetBlurRadius() {
+        currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
     }
 
     public void increaseStreak() {
