@@ -5,6 +5,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.whosthat.GameRepository;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -18,9 +20,8 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     private static final int INITIAL_BLUR_RADIUS = 70;
     private static final int BLUR_REDUCTION_STEP = 15;
     private static final int MIN_BLUR_RADIUS = 1;
+    public static final String DDRAGON_VERSION = "16.11.1";
 
-    private final MutableLiveData<String> currentChampionName = new MutableLiveData<>();
-    private final MutableLiveData<String> currentChampionPortraitUrl = new MutableLiveData<>();
     private final MutableLiveData<Integer> streakCounter = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
@@ -28,14 +29,16 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     private final MutableLiveData<Boolean> isChampionListLoaded = new MutableLiveData<>(false);
 
     private final LeagueApiService leagueApiService;
+    private final GameRepository gameRepository;
     private final Random random = new Random();
 
     public LeagueOfLegendsViewModel(LeagueApiService leagueApiService) {
         this.leagueApiService = leagueApiService;
+        this.gameRepository = GameRepository.getInstance();
     }
 
-    public LiveData<String> getCurrentChampionName() { return currentChampionName; }
-    public LiveData<String> getCurrentChampionPortraitUrl() { return currentChampionPortraitUrl; }
+    public LiveData<String> getCurrentChampionName() { return gameRepository.getCurrentChampionName(); }
+    public LiveData<String> getCurrentChampionPortraitUrl() { return gameRepository.getCurrentChampionPortraitUrl(); }
     public LiveData<Integer> getStreakCounter() { return streakCounter; }
     public LiveData<Boolean> getIsLoading() { return isLoading; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
@@ -43,8 +46,9 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     public LiveData<Boolean> getIsChampionListLoaded() { return isChampionListLoaded; }
 
     public void loadChampionList() {
-        if (isChampionListLoaded.getValue() == Boolean.TRUE) {
+        if (isChampionListLoaded.getValue() == Boolean.TRUE || ChampionList.isInitialized()) {
             Log.d(TAG, "Champion list already loaded, skipping");
+            isChampionListLoaded.setValue(true);
             return;
         }
 
@@ -100,7 +104,7 @@ public class LeagueOfLegendsViewModel extends ViewModel {
 
         String randomChampion = championNames.get(random.nextInt(championNames.size()));
         Log.d(TAG, "Fetching random champion: " + randomChampion);
-        currentChampionName.setValue(randomChampion);
+        gameRepository.setCurrentChampionName(randomChampion);
 
         fetchChampionData(randomChampion);
     }
@@ -119,9 +123,9 @@ public class LeagueOfLegendsViewModel extends ViewModel {
                         LeagueChampionModel.ChampionData championData = championDataMap.values().iterator().next();
 
                         // Construct the URL for the champion's portrait
-                        String portraitUrl = String.format("https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/%s.png", encodedChampionName);
+                        String portraitUrl = String.format("https://ddragon.leagueoflegends.com/cdn/%s/img/champion/%s.png", DDRAGON_VERSION, encodedChampionName);
                         Log.d(TAG, "Champion portrait URL: " + portraitUrl);
-                        currentChampionPortraitUrl.setValue(portraitUrl);
+                        gameRepository.setCurrentChampionPortraitUrl(portraitUrl);
 
                         currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
                     } else {
@@ -186,7 +190,7 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     }
 
     public boolean checkGuess(String guess) {
-        String currentChampion = currentChampionName.getValue();
+        String currentChampion = gameRepository.getCurrentChampionName().getValue();
         if (currentChampion == null) {
             return false;
         }
@@ -209,8 +213,8 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     }
 
     public void increaseStreak() {
-        Integer currentStreak = streakCounter.getValue();
-        streakCounter.setValue(currentStreak != null ? currentStreak + 1 : 1);
+        Integer currentStreakValue = streakCounter.getValue();
+        streakCounter.setValue(currentStreakValue != null ? currentStreakValue + 1 : 1);
     }
 
     public void resetStreak() {

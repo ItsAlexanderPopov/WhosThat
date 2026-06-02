@@ -36,8 +36,7 @@ import com.example.whosthat.HighScoreManager;
 import java.util.List;
 
 public class PokemonPage extends AppCompatActivity {
-    private static final int REVEAL_DURATION = 3000; // 3 seconds
-
+    private static final int REVEAL_DURATION = 3000;
     private PokemonViewModel viewModel;
     private ImageView imagePokemon;
     private AutoCompleteTextView inputPokemon;
@@ -65,7 +64,7 @@ public class PokemonPage extends AppCompatActivity {
 
         handler = new Handler(Looper.getMainLooper());
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && viewModel.getCurrentPokemonName().getValue() == null) {
             viewModel.fetchRandomPokemon();
         }
     }
@@ -93,7 +92,7 @@ public class PokemonPage extends AppCompatActivity {
 
     private void setupAutocomplete() {
         List<String> pokemonList = PokeList.getFormattedPokemonList();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, pokemonList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, pokemonList);
         inputPokemon.setAdapter(adapter);
         inputPokemon.setThreshold(1);
     }
@@ -139,11 +138,14 @@ public class PokemonPage extends AppCompatActivity {
     private void confirmPokemon() {
         String enteredName = inputPokemon.getText().toString().trim();
         // delete this in production
-        if(enteredName.equals("next")){
-            String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentPokemonName().getValue());
-            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
-            revealPokemon();
-            highScoreManager.unlockSecretAchievement();
+        if(enteredName.equalsIgnoreCase("next")){
+            String currentName = viewModel.getCurrentPokemonName().getValue();
+            if (currentName != null) {
+                String displayName = PokeList.denormalizePokemonName(currentName);
+                Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
+                revealPokemon();
+                highScoreManager.unlockSecretAchievement();
+            }
             return;
         }
 
@@ -154,10 +156,12 @@ public class PokemonPage extends AppCompatActivity {
 
         boolean isCorrect = viewModel.checkGuess(enteredName);
         if (isCorrect) {
-            String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentPokemonName().getValue());
+            String currentName = viewModel.getCurrentPokemonName().getValue();
+            String displayName = (currentName != null) ? PokeList.denormalizePokemonName(currentName) : enteredName;
             Toast.makeText(this, "Correct! It's " + displayName + "!", Toast.LENGTH_SHORT).show();
-            int currentStreak = viewModel.getStreakCounter().getValue();
-            highScoreManager.updateHighStreakPokemon(currentStreak);
+            Integer currentStreakValue = viewModel.getStreakCounter().getValue();
+            int streak = (currentStreakValue != null) ? currentStreakValue : 0;
+            highScoreManager.updateHighStreakPokemon(streak);
             revealPokemon();
         } else {
             Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();
@@ -219,6 +223,9 @@ public class PokemonPage extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (viewModel.getCurrentSpriteUrl().getValue() == null) {
+            viewModel.fetchRandomPokemon();
+        }
     }
 
     @Override

@@ -34,7 +34,6 @@ import com.bumptech.glide.request.target.Target;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
 import com.example.whosthat.HighScoreManager;
-import com.example.whosthat.pokemon.PokeList;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.GrayscaleTransformation;
@@ -116,7 +115,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             loadImage(viewModel.getCurrentChampionPortraitUrl().getValue());
         });
         viewModel.getIsChampionListLoaded().observe(this, isLoaded -> {
-            if (isLoaded) {
+            if (isLoaded && viewModel.getCurrentChampionName().getValue() == null) {
                 viewModel.fetchRandomChampion();
             }
         });
@@ -177,11 +176,13 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         String enteredName = inputChampion.getText().toString().trim();
 
         // delete this in production
-        if(enteredName.equals("next")){
-            String displayName = PokeList.denormalizePokemonName(viewModel.getCurrentChampionName().getValue());
-            Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
-            revealChampion();
-            highScoreManager.unlockSecretAchievement();
+        if(enteredName.equalsIgnoreCase("next")){
+            String currentName = viewModel.getCurrentChampionName().getValue();
+            if (currentName != null) {
+                Toast.makeText(this, "It was " + currentName + "!", Toast.LENGTH_SHORT).show();
+                revealChampion();
+                highScoreManager.unlockSecretAchievement();
+            }
             return;
         }
 
@@ -194,11 +195,13 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         if (isCorrect) {
             Toast.makeText(this, "Correct! It's " + enteredName + "!", Toast.LENGTH_SHORT).show();
             viewModel.increaseStreak();
-            int currentStreak = viewModel.getStreakCounter().getValue();
-            highScoreManager.updateHighStreakLeagueOfLegends(currentStreak);
+            Integer currentStreakValue = viewModel.getStreakCounter().getValue();
+            int streak = (currentStreakValue != null) ? currentStreakValue : 0;
+            highScoreManager.updateHighStreakLeagueOfLegends(streak);
             revealChampion();
         } else {
             if (currentAttempts >= MAX_ATTEMPTS) {
+                updateAttemptsLeftText();
                 String correctName = viewModel.getCurrentChampionName().getValue();
                 Toast.makeText(this, "Wrong! It was " + correctName, Toast.LENGTH_LONG).show();
                 viewModel.resetStreak();
@@ -250,9 +253,6 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private void showError(String errorMessage) {
         if (errorMessage != null && !errorMessage.isEmpty()) {
             Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
-            contentContainer.setVisibility(View.GONE);
-        } else {
-            contentContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -279,6 +279,13 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         super.onResume();
         if (ChampionList.isInitialized()) {
             setupAutocomplete();
+        }
+
+        // If champion list is not loaded or current champion is null (due to error), retry
+        if (!ChampionList.isInitialized()) {
+            viewModel.loadChampionList();
+        } else if (viewModel.getCurrentChampionPortraitUrl().getValue() == null) {
+            viewModel.fetchRandomChampion();
         }
     }
 

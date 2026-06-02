@@ -3,8 +3,8 @@ package com.example.whosthat;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.activity.EdgeToEdge;
@@ -15,10 +15,23 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.whosthat.achievements.AchievementsActivity;
+import com.example.whosthat.league.ChampionList;
+import com.example.whosthat.league.LeagueChampionModel;
 import com.example.whosthat.league.LeagueOfLegendsPage;
+import com.example.whosthat.league.LeagueRetrofitClient;
+import com.example.whosthat.pokemon.PokemonModel;
 import com.example.whosthat.pokemon.PokemonPage;
+import com.example.whosthat.pokemon.PokemonRetrofitClient;
+
+import java.util.Map;
+import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
     private boolean isDarkTheme;
     private ImageView themeToggleIcon;
 
@@ -38,9 +51,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        Button pokemonButton = findViewById(R.id.button_pokemon);
-        Button championButton = findViewById(R.id.button_champion);
-        Button achievementsButton = findViewById(R.id.button_achievements);
+        View pokemonButton = findViewById(R.id.button_pokemon);
+        View championButton = findViewById(R.id.button_champion);
+        View achievementsButton = findViewById(R.id.button_achievements);
         themeToggleIcon = findViewById(R.id.theme_toggle_icon);
 
         pokemonButton.setOnClickListener(v -> {
@@ -63,6 +76,60 @@ public class MainActivity extends AppCompatActivity {
         themeToggleIcon.setOnClickListener(v -> toggleTheme());
 
         updateThemeIcon();
+
+        // Pre-fetch champion list
+        preloadChampionList();
+        preloadPokemon();
+    }
+
+    private void preloadPokemon() {
+        if (GameRepository.getInstance().getCurrentPokemonName().getValue() != null) {
+            return;
+        }
+
+        Log.d(TAG, "Preloading random Pokemon");
+        int id = new Random().nextInt(151) + 1;
+        PokemonRetrofitClient.getPokeApiService().getPokemon(id).enqueue(new Callback<PokemonModel>() {
+            @Override
+            public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    PokemonModel pokemon = response.body();
+                    GameRepository.getInstance().setCurrentPokemonName(pokemon.name);
+                    GameRepository.getInstance().setCurrentPokemonSpriteUrl(pokemon.sprites != null ? pokemon.sprites.frontDefault : null);
+                    Log.d(TAG, "Pokemon preloaded: " + pokemon.name);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PokemonModel> call, Throwable t) {
+                Log.e(TAG, "Failed to preload Pokemon", t);
+            }
+        });
+    }
+
+    private void preloadChampionList() {
+        if (ChampionList.isInitialized()) {
+            return;
+        }
+
+        Log.d(TAG, "Preloading champion list");
+        LeagueRetrofitClient.getLeagueApiService().getChampionList().enqueue(new Callback<LeagueChampionModel.ChampionList>() {
+            @Override
+            public void onResponse(Call<LeagueChampionModel.ChampionList> call, Response<LeagueChampionModel.ChampionList> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Map<String, LeagueChampionModel.ChampionData> champions = response.body().getChampions();
+                    if (champions != null) {
+                        ChampionList.initialize(champions);
+                        Log.d(TAG, "Champion list preloaded successfully");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LeagueChampionModel.ChampionList> call, Throwable t) {
+                Log.e(TAG, "Failed to preload champion list", t);
+            }
+        });
     }
 
     private void loadThemePreference() {

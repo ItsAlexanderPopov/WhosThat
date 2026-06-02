@@ -4,7 +4,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LeagueRetrofitClient {
-    private static final String BASE_URL = "https://ddragon.leagueoflegends.com/cdn/14.20.1/";
+    private static final String BASE_URL = "https://ddragon.leagueoflegends.com/cdn/" + LeagueOfLegendsViewModel.DDRAGON_VERSION + "/";
     private static Retrofit retrofit = null;
 
     private LeagueRetrofitClient() {
