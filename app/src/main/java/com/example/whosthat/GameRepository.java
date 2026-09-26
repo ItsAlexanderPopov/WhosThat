@@ -9,6 +9,8 @@ public class GameRepository {
     private final MutableLiveData<String> currentPokemonName = new MutableLiveData<>();
     private final MutableLiveData<String> currentPokemonSpriteUrl = new MutableLiveData<>();
 
+    private boolean pokemonRequestInFlight = false;
+
     private final MutableLiveData<String> currentChampionName = new MutableLiveData<>();
     private final MutableLiveData<String> currentChampionPortraitUrl = new MutableLiveData<>();
 
@@ -22,10 +24,17 @@ public class GameRepository {
     }
 
     public LiveData<String> getCurrentPokemonName() { return currentPokemonName; }
-    public void setCurrentPokemonName(String name) { currentPokemonName.setValue(name); }
 
     public LiveData<String> getCurrentPokemonSpriteUrl() { return currentPokemonSpriteUrl; }
-    public void setCurrentPokemonSpriteUrl(String url) { currentPokemonSpriteUrl.setValue(url); }
+
+    // Name first so the image observer never pairs a new picture with the previous answer
+    public void setCurrentPokemon(String name, String spriteUrl) {
+        currentPokemonName.setValue(name);
+        currentPokemonSpriteUrl.setValue(spriteUrl);
+    }
+
+    public boolean isPokemonRequestInFlight() { return pokemonRequestInFlight; }
+    public void setPokemonRequestInFlight(boolean inFlight) { pokemonRequestInFlight = inFlight; }
 
     public LiveData<String> getCurrentChampionName() { return currentChampionName; }
     public void setCurrentChampionName(String name) { currentChampionName.setValue(name); }

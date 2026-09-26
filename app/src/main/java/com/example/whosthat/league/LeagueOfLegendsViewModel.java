@@ -7,20 +7,13 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.whosthat.GameRepository;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class LeagueOfLegendsViewModel extends ViewModel {
     private static final String TAG = "LeagueViewModel";
     private static final int INITIAL_BLUR_RADIUS = 70;
     private static final int BLUR_REDUCTION_STEP = 15;
     private static final int MIN_BLUR_RADIUS = 1;
-    public static final String DDRAGON_VERSION = "16.11.1";
 
     private final MutableLiveData<Integer> streakCounter = new MutableLiveData<>(0);
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
@@ -46,147 +39,43 @@ public class LeagueOfLegendsViewModel extends ViewModel {
     public LiveData<Boolean> getIsChampionListLoaded() { return isChampionListLoaded; }
 
     public void loadChampionList() {
-        if (isChampionListLoaded.getValue() == Boolean.TRUE || ChampionList.isInitialized()) {
-            Log.d(TAG, "Champion list already loaded, skipping");
+        if (ChampionList.isInitialized()) {
             isChampionListLoaded.setValue(true);
             return;
         }
 
-        Log.d(TAG, "Loading champion list");
         isLoading.setValue(true);
         errorMessage.setValue(null);
-
-        leagueApiService.getChampionList().enqueue(new Callback<LeagueChampionModel.ChampionList>() {
+        ChampionListLoader.load(leagueApiService, new ChampionListLoader.Listener() {
             @Override
-            public void onResponse(Call<LeagueChampionModel.ChampionList> call, Response<LeagueChampionModel.ChampionList> response) {
+            public void onLoaded() {
                 isLoading.setValue(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, LeagueChampionModel.ChampionData> champions = response.body().getChampions();
-                    if (champions != null) {
-                        Log.d(TAG, "Champion list loaded successfully. Champion count: " + champions.size());
-                        ChampionList.initialize(champions);
-                        isChampionListLoaded.setValue(true);
-                    } else {
-                        Log.e(TAG, "Champion data is null");
-                        errorMessage.setValue("Champion data is null");
-                    }
-                } else {
-                    Log.e(TAG, "Error loading champion list. Response code: " + response.code());
-                    errorMessage.setValue("Error loading champion list: " + response.code());
-                }
+                isChampionListLoaded.setValue(true);
             }
 
             @Override
-            public void onFailure(Call<LeagueChampionModel.ChampionList> call, Throwable t) {
-                Log.e(TAG, "Network error while loading champion list", t);
+            public void onError(String message) {
                 isLoading.setValue(false);
-                errorMessage.setValue("Network error: " + t.getMessage());
+                errorMessage.setValue(message);
             }
         });
     }
 
     public void fetchRandomChampion() {
-        if (!ChampionList.isInitialized()) {
-            Log.e(TAG, "Champion list not initialized. Cannot fetch random champion.");
-            errorMessage.setValue("Champion list not initialized");
+        LeagueChampionModel.ChampionData champion =
+                ChampionList.getRandomChampion(random, gameRepository.getCurrentChampionName().getValue());
+        if (champion == null) {
+            Log.e(TAG, "Champion list not initialized. Cannot pick a random champion.");
+            errorMessage.setValue("Champion list not loaded yet");
             return;
         }
 
-        List<String> championNames = ChampionList.getChampionNames();
-        if (championNames.isEmpty()) {
-            Log.e(TAG, "Champion list is empty");
-            errorMessage.setValue("Champion list is empty");
-            return;
-        }
-
-        isLoading.setValue(true);
-        errorMessage.setValue(null);
-
-        String randomChampion = championNames.get(random.nextInt(championNames.size()));
-        Log.d(TAG, "Fetching random champion: " + randomChampion);
-        gameRepository.setCurrentChampionName(randomChampion);
-
-        fetchChampionData(randomChampion);
-    }
-
-    private void fetchChampionData(String championName) {
-        Log.d(TAG, "Fetching data for champion: " + championName);
-        String encodedChampionName = encodeChampionName(championName);
-        Log.d(TAG, "Encoded champion name for API call: " + encodedChampionName);
-
-        leagueApiService.getChampionData(encodedChampionName).enqueue(new Callback<LeagueChampionModel>() {
-            @Override
-            public void onResponse(Call<LeagueChampionModel> call, Response<LeagueChampionModel> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, LeagueChampionModel.ChampionData> championDataMap = response.body().getData();
-                    if (championDataMap != null && !championDataMap.isEmpty()) {
-                        LeagueChampionModel.ChampionData championData = championDataMap.values().iterator().next();
-
-                        // Construct the URL for the champion's portrait
-                        String portraitUrl = String.format("https://ddragon.leagueoflegends.com/cdn/%s/img/champion/%s.png", DDRAGON_VERSION, encodedChampionName);
-                        Log.d(TAG, "Champion portrait URL: " + portraitUrl);
-                        gameRepository.setCurrentChampionPortraitUrl(portraitUrl);
-
-                        currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
-                    } else {
-                        Log.e(TAG, "Champion data is empty for: " + championName);
-                        errorMessage.setValue("Champion data is empty for: " + championName);
-                    }
-                } else {
-                    Log.e(TAG, "Error fetching champion data. Response code: " + response.code());
-                    errorMessage.setValue("Error fetching champion data: " + response.code());
-                }
-                isLoading.setValue(false);
-            }
-
-            @Override
-            public void onFailure(Call<LeagueChampionModel> call, Throwable t) {
-                Log.e(TAG, "Network error while fetching champion data", t);
-                errorMessage.setValue("Network error: " + t.getMessage());
-                isLoading.setValue(false);
-            }
-        });
-    }
-
-    private String encodeChampionName(String championName) {
-        Log.d(TAG, "Encoding champion name: " + championName);
-        String encodedName = championName.replace(" ", "").replace("'", "");
-        encodedName = encodedName.replace(".", "");
-        encodedName = encodedName.replace("&", "");
-
-        // Handle special cases
-        switch (encodedName.toLowerCase()) {
-            case "belveth":
-                return "Belveth";
-            case "chogath":
-                return "Chogath";
-            case "leblanc":
-                return "Leblanc";
-            case "drmundo":
-                return "DrMundo";
-            case "jarvaniv":
-                return "JarvanIV";
-            case "kaisa":
-                return "Kaisa";
-            case "khazix":
-                return "Khazix";
-            case "kogmaw":
-                return "KogMaw";
-            case "leesin":
-                return "LeeSin";
-            case "nunuwillump":
-                return "Nunu";
-            case "reksai":
-                return "RekSai";
-            case "velkoz":
-                return "Velkoz";
-            case "wukong":
-                return "MonkeyKing";
-            case "renataglasc":
-                return "Renata";
-            default:
-                return encodedName.substring(0, 1).toUpperCase() + encodedName.substring(1);
-        }
+        String portraitUrl = ChampionList.getPortraitUrl(champion);
+        Log.d(TAG, "Picked " + champion.getName() + " -> " + portraitUrl);
+        // Reset the blur before publishing the new image so it is never shown unblurred
+        currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
+        gameRepository.setCurrentChampionName(champion.getName());
+        gameRepository.setCurrentChampionPortraitUrl(portraitUrl);
     }
 
     public boolean checkGuess(String guess) {
@@ -195,21 +84,14 @@ public class LeagueOfLegendsViewModel extends ViewModel {
             return false;
         }
 
-        if (guess.equalsIgnoreCase(currentChampion)) {
-            return true;
-        } else {
-            return false;
-        }
+        LeagueChampionModel.ChampionData guessed = ChampionList.findChampion(guess);
+        return guessed != null && guessed.getName().equals(currentChampion);
     }
 
     public void reduceBlurRadius() {
         int currentRadius = currentBlurRadius.getValue() != null ? currentBlurRadius.getValue() : INITIAL_BLUR_RADIUS;
         int newRadius = Math.max(MIN_BLUR_RADIUS, currentRadius - BLUR_REDUCTION_STEP);
         currentBlurRadius.setValue(newRadius);
-    }
-
-    public void resetBlurRadius() {
-        currentBlurRadius.setValue(INITIAL_BLUR_RADIUS);
     }
 
     public void increaseStreak() {

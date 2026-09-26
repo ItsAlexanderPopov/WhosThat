@@ -46,6 +46,8 @@ public class PokemonPage extends AppCompatActivity {
     private TextView streakCounterTextView;
     private Handler handler;
     private HighScoreManager highScoreManager;
+    // True after a reveal until the next Pokemon arrives, so the old answer can't be guessed again
+    private boolean awaitingNextPokemon = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +65,7 @@ public class PokemonPage extends AppCompatActivity {
         setupBackNavigation();
 
         handler = new Handler(Looper.getMainLooper());
-
-        if (savedInstanceState == null && viewModel.getCurrentPokemonName().getValue() == null) {
-            viewModel.fetchRandomPokemon();
-        }
+        // The first Pokemon is fetched in onResume if the main menu hasn't preloaded one
     }
 
     private void initializeViews() {
@@ -116,6 +115,7 @@ public class PokemonPage extends AppCompatActivity {
 
     private void loadImage(@Nullable String url) {
         if (url != null && !url.isEmpty()) {
+            awaitingNextPokemon = false;
             Glide.with(this)
                     .load(url)
                     .listener(new RequestListener<Drawable>() {
@@ -137,12 +137,19 @@ public class PokemonPage extends AppCompatActivity {
 
     private void confirmPokemon() {
         String enteredName = inputPokemon.getText().toString().trim();
+        if (awaitingNextPokemon) {
+            // Loading the next Pokemon failed earlier; treat the button as a retry
+            viewModel.fetchRandomPokemon();
+            return;
+        }
         // delete this in production
         if(enteredName.equalsIgnoreCase("next")){
             String currentName = viewModel.getCurrentPokemonName().getValue();
             if (currentName != null) {
-                String displayName = PokeList.denormalizePokemonName(currentName);
+                String displayName = PokeList.getDisplayName(currentName);
                 Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
+                // Skipping ends the streak, otherwise "next" could farm streak achievements
+                viewModel.resetStreak();
                 revealPokemon();
                 highScoreManager.unlockSecretAchievement();
             }
@@ -157,7 +164,7 @@ public class PokemonPage extends AppCompatActivity {
         boolean isCorrect = viewModel.checkGuess(enteredName);
         if (isCorrect) {
             String currentName = viewModel.getCurrentPokemonName().getValue();
-            String displayName = (currentName != null) ? PokeList.denormalizePokemonName(currentName) : enteredName;
+            String displayName = (currentName != null) ? PokeList.getDisplayName(currentName) : enteredName;
             Toast.makeText(this, "Correct! It's " + displayName + "!", Toast.LENGTH_SHORT).show();
             Integer currentStreakValue = viewModel.getStreakCounter().getValue();
             int streak = (currentStreakValue != null) ? currentStreakValue : 0;
@@ -169,6 +176,7 @@ public class PokemonPage extends AppCompatActivity {
     }
 
     private void revealPokemon() {
+        awaitingNextPokemon = true;
         imagePokemon.setColorFilter(null);
         buttonConfirmPokemon.setEnabled(false);
         inputPokemon.setEnabled(false);

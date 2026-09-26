@@ -15,15 +15,14 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.whosthat.achievements.AchievementsActivity;
-import com.example.whosthat.league.ChampionList;
-import com.example.whosthat.league.LeagueChampionModel;
+import com.example.whosthat.league.ChampionListLoader;
 import com.example.whosthat.league.LeagueOfLegendsPage;
 import com.example.whosthat.league.LeagueRetrofitClient;
+import com.example.whosthat.pokemon.PokeList;
 import com.example.whosthat.pokemon.PokemonModel;
 import com.example.whosthat.pokemon.PokemonPage;
 import com.example.whosthat.pokemon.PokemonRetrofitClient;
 
-import java.util.Map;
 import java.util.Random;
 
 import retrofit2.Call;
@@ -83,53 +82,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void preloadPokemon() {
-        if (GameRepository.getInstance().getCurrentPokemonName().getValue() != null) {
+        GameRepository repository = GameRepository.getInstance();
+        if (repository.getCurrentPokemonName().getValue() != null || repository.isPokemonRequestInFlight()) {
             return;
         }
 
         Log.d(TAG, "Preloading random Pokemon");
-        int id = new Random().nextInt(151) + 1;
+        repository.setPokemonRequestInFlight(true);
+        int id = new Random().nextInt(PokeList.GEN1_COUNT) + 1;
         PokemonRetrofitClient.getPokeApiService().getPokemon(id).enqueue(new Callback<PokemonModel>() {
             @Override
             public void onResponse(Call<PokemonModel> call, Response<PokemonModel> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    PokemonModel pokemon = response.body();
-                    GameRepository.getInstance().setCurrentPokemonName(pokemon.name);
-                    GameRepository.getInstance().setCurrentPokemonSpriteUrl(pokemon.sprites != null ? pokemon.sprites.frontDefault : null);
+                repository.setPokemonRequestInFlight(false);
+                PokemonModel pokemon = response.body();
+                if (response.isSuccessful() && pokemon != null && repository.getCurrentPokemonName().getValue() == null) {
+                    repository.setCurrentPokemon(pokemon.name, pokemon.getImageUrl());
                     Log.d(TAG, "Pokemon preloaded: " + pokemon.name);
                 }
             }
 
             @Override
             public void onFailure(Call<PokemonModel> call, Throwable t) {
+                repository.setPokemonRequestInFlight(false);
                 Log.e(TAG, "Failed to preload Pokemon", t);
             }
         });
     }
 
     private void preloadChampionList() {
-        if (ChampionList.isInitialized()) {
-            return;
-        }
-
-        Log.d(TAG, "Preloading champion list");
-        LeagueRetrofitClient.getLeagueApiService().getChampionList().enqueue(new Callback<LeagueChampionModel.ChampionList>() {
-            @Override
-            public void onResponse(Call<LeagueChampionModel.ChampionList> call, Response<LeagueChampionModel.ChampionList> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, LeagueChampionModel.ChampionData> champions = response.body().getChampions();
-                    if (champions != null) {
-                        ChampionList.initialize(champions);
-                        Log.d(TAG, "Champion list preloaded successfully");
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LeagueChampionModel.ChampionList> call, Throwable t) {
-                Log.e(TAG, "Failed to preload champion list", t);
-            }
-        });
+        ChampionListLoader.load(LeagueRetrofitClient.getLeagueApiService(), null);
     }
 
     private void loadThemePreference() {

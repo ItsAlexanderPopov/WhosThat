@@ -56,6 +56,9 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private Handler handler;
     private HighScoreManager highScoreManager;
     private int currentAttempts = 0;
+    // What is currently drawn, so the URL and blur observers don't load the same image twice
+    private String loadedUrl;
+    private int loadedBlurRadius = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,16 +109,19 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         viewModel.getStreakCounter().observe(this, this::updateStreakCounter);
         viewModel.getIsLoading().observe(this, this::updateLoadingState);
         viewModel.getErrorMessage().observe(this, this::showError);
-        viewModel.getCurrentChampionName().observe(this, name -> {
-            if (name != null && !name.isEmpty()) {
-                setupAutocomplete();
+        viewModel.getCurrentBlurRadius().observe(this, blurRadius -> {
+            // Only re-blur the champion already on screen; new champions come through the URL observer
+            String url = viewModel.getCurrentChampionPortraitUrl().getValue();
+            if (url != null && url.equals(loadedUrl)) {
+                loadImage(url);
             }
         });
-        viewModel.getCurrentBlurRadius().observe(this, blurRadius -> {
-            loadImage(viewModel.getCurrentChampionPortraitUrl().getValue());
-        });
         viewModel.getIsChampionListLoaded().observe(this, isLoaded -> {
-            if (isLoaded && viewModel.getCurrentChampionName().getValue() == null) {
+            if (!isLoaded) {
+                return;
+            }
+            setupAutocomplete();
+            if (viewModel.getCurrentChampionName().getValue() == null) {
                 viewModel.fetchRandomChampion();
             }
         });
@@ -144,6 +150,11 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             if (currentBlurRadius == null) {
                 currentBlurRadius = 1; // Fallback to minimum blur if null
             }
+            if (url.equals(loadedUrl) && currentBlurRadius == loadedBlurRadius) {
+                return;
+            }
+            loadedUrl = url;
+            loadedBlurRadius = currentBlurRadius;
 
             MultiTransformation<Bitmap> multiTransformation = new MultiTransformation<>(
                     new CenterCrop(),
@@ -180,6 +191,8 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
             String currentName = viewModel.getCurrentChampionName().getValue();
             if (currentName != null) {
                 Toast.makeText(this, "It was " + currentName + "!", Toast.LENGTH_SHORT).show();
+                // Skipping ends the streak, otherwise "next" could farm streak achievements
+                viewModel.resetStreak();
                 revealChampion();
                 highScoreManager.unlockSecretAchievement();
             }
@@ -193,7 +206,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         currentAttempts++;
         boolean isCorrect = viewModel.checkGuess(enteredName);
         if (isCorrect) {
-            Toast.makeText(this, "Correct! It's " + enteredName + "!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Correct! It's " + viewModel.getCurrentChampionName().getValue() + "!", Toast.LENGTH_SHORT).show();
             viewModel.increaseStreak();
             Integer currentStreakValue = viewModel.getStreakCounter().getValue();
             int streak = (currentStreakValue != null) ? currentStreakValue : 0;
@@ -215,6 +228,8 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     }
 
     private void revealChampion() {
+        loadedUrl = null;
+        loadedBlurRadius = -1;
         Glide.with(this)
                 .load(viewModel.getCurrentChampionPortraitUrl().getValue())
                 .transition(DrawableTransitionOptions.withCrossFade())
@@ -225,7 +240,6 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
 
         handler.postDelayed(() -> {
             viewModel.fetchRandomChampion();
-            viewModel.resetBlurRadius();
             buttonConfirmChampion.setEnabled(true);
             inputChampion.setEnabled(true);
             inputChampion.setText("");

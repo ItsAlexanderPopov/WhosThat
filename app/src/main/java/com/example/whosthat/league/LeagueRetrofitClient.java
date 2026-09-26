@@ -4,14 +4,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LeagueRetrofitClient {
-    private static final String BASE_URL = "https://ddragon.leagueoflegends.com/cdn/" + LeagueOfLegendsViewModel.DDRAGON_VERSION + "/";
+    public static final String BASE_URL = "https://ddragon.leagueoflegends.com/";
     private static Retrofit retrofit = null;
+    private static LeagueApiService service = null;
 
     private LeagueRetrofitClient() {
         // Private constructor to prevent instantiation
     }
 
-    public static Retrofit getClient() {
+    public static synchronized Retrofit getClient() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
@@ -21,7 +22,10 @@ public class LeagueRetrofitClient {
         return retrofit;
     }
 
-    public static LeagueApiService getLeagueApiService() {
-        return getClient().create(LeagueApiService.class);
+    public static synchronized LeagueApiService getLeagueApiService() {
+        if (service == null) {
+            service = getClient().create(LeagueApiService.class);
+        }
+        return service;
     }
 }

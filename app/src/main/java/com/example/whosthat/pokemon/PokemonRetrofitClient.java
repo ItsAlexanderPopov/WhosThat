@@ -6,12 +6,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class PokemonRetrofitClient {
     private static final String BASE_URL = "https://pokeapi.co/api/v2/";
     private static Retrofit retrofit = null;
+    private static PokeApiService service = null;
 
     private PokemonRetrofitClient() {
         // Private constructor to prevent instantiation
     }
 
-    public static Retrofit getClient() {
+    public static synchronized Retrofit getClient() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
@@ -21,7 +22,10 @@ public class PokemonRetrofitClient {
         return retrofit;
     }
 
-    public static PokeApiService getPokeApiService() {
-        return getClient().create(PokeApiService.class);
+    public static synchronized PokeApiService getPokeApiService() {
+        if (service == null) {
+            service = getClient().create(PokeApiService.class);
+        }
+        return service;
     }
 }
