@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Achievement icon "ach_clutch_poke", generated in the style of the other achievement icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="210"
+    android:viewportHeight="210">
+    <path
+        android:pathData="M30,0 H180 A30,30 0 0 1 210,30 V180 A30,30 0 0 1 180,210 H30 A30,30 0 0 1 0,180 V30 A30,30 0 0 1 30,0 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M64,30 H146 V44 H64 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M64,142 H146 V156 H64 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M76,44 H134 C134,74 113,82 113,93 C113,104 134,112 134,142 H76 C76,112 97,104 97,93 C97,82 76,74 76,44 Z"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M88,58 L122,58 C118,70 108,76 105,84 C102,76 92,70 88,58 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M105,86 V124"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M84,136 C90,120 120,120 126,136 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M90,184 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M90,184 a15,15 0 0,1 30,0 z"
+        android:fillColor="#E3350D" />
+    <path
+        android:pathData="M90,182 H120 V186 H90 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M99,184 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M101.5,184 a3.5,3.5 0 1,0 7.0,0 a3.5,3.5 0 1,0 -7.0,0 z"
+        android:fillColor="#FFFFFF" />
+</vector>

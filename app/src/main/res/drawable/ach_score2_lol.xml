@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Achievement icon "ach_score2_lol", generated in the style of the other achievement icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="210"
+    android:viewportHeight="210">
+    <path
+        android:pathData="M30,0 H180 A30,30 0 0 1 210,30 V180 A30,30 0 0 1 180,210 H30 A30,30 0 0 1 0,180 V30 A30,30 0 0 1 30,0 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M66,54 H48 V64 C48,80 57,88 70,90"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M144,54 H162 V64 C162,80 153,88 140,90"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M64,36 H146 V72 C146,104 128,120 105,120 C82,120 64,104 64,72 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M97,118 H113 V138 H97 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M76,138 H134 V154 H76 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M92.0,61.0 L94.7,68.3 L102.5,68.6 L96.4,73.4 L98.5,80.9 L92.0,76.6 L85.5,80.9 L87.6,73.4 L81.5,68.6 L89.3,68.3 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M118.0,61.0 L120.7,68.3 L128.5,68.6 L122.4,73.4 L124.5,80.9 L118.0,76.6 L111.5,80.9 L113.6,73.4 L107.5,68.6 L115.3,68.3 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M105,170 L113,183 L105,198 L97,183 Z"
+        android:fillColor="#C89B3C" />
+    <path
+        android:pathData="M95,175 L76,170 L85,183 L96,187 Z"
+        android:fillColor="#C89B3C" />
+    <path
+        android:pathData="M115,175 L134,170 L125,183 L114,187 Z"
+        android:fillColor="#C89B3C" />
+</vector>

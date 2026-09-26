@@ -30,9 +30,11 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.example.whosthat.GameMode;
 import com.example.whosthat.HighScoreManager;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
+import com.example.whosthat.achievements.AchievementNotifier;
 import com.example.whosthat.game.GameBoardUi;
 import com.example.whosthat.game.GuessOutcome;
 import com.example.whosthat.game.Round;
@@ -121,7 +123,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
     private void setupObservers() {
         viewModel.getCurrentChampionPortraitUrl().observe(this, this::loadImage);
         viewModel.getStreakCounter().observe(this, gameUi::setStreak);
-        viewModel.getScore().observe(this, score -> gameUi.setScore(score, highScoreManager.getBestScoreLeagueOfLegends()));
+        viewModel.getScore().observe(this, score -> gameUi.setScore(score, highScoreManager.getBestScore(GameMode.LEAGUE)));
         viewModel.getRound().observe(this, gameUi::bindRound);
         viewModel.getIsLoading().observe(this, this::updateLoadingState);
         viewModel.getErrorMessage().observe(this, this::showError);
@@ -212,7 +214,7 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
         if (enteredName.equalsIgnoreCase("next")) {
             GuessOutcome outcome = viewModel.skip();
             if (outcome.type == GuessOutcome.Type.LOST) {
-                highScoreManager.unlockSecretAchievement();
+                AchievementNotifier.recordAndNotify(this, highScoreManager, highScoreManager::unlockSecretAchievement);
                 Toast.makeText(this, "Skipped! It was " + outcome.answer + ".", Toast.LENGTH_SHORT).show();
                 revealChampion();
             }
@@ -236,8 +238,8 @@ public class LeagueOfLegendsPage extends AppCompatActivity {
                 Toast.makeText(this, "Correct! It's " + outcome.answer + "!\n" + outcome.points.describe(),
                         Toast.LENGTH_LONG).show();
                 Integer streak = viewModel.getStreakCounter().getValue();
-                highScoreManager.updateHighStreakLeagueOfLegends(streak != null ? streak : 0);
-                highScoreManager.updateBestScoreLeagueOfLegends(outcome.runScore);
+                AchievementNotifier.recordAndNotify(this, highScoreManager, () -> highScoreManager.recordRoundWon(
+                        GameMode.LEAGUE, streak != null ? streak : 0, outcome.runScore, outcome.points));
                 revealChampion();
                 break;
             case LOST:

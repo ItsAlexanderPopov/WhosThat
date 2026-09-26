@@ -23,6 +23,18 @@ wrong guess, minus the hints used, plus 250 for getting it on the first try; nev
 Points add up across rounds, and the run (score and streak) ends when you run out of guesses or
 skip. Your best run is saved.
 
+### Achievements
+
+Each game has its own set, unlocked in-game with a pop-up:
+
+- **Streak**: 5 / 10 / 15 / 20 correct in a row
+- **Score**: 5,000 / 10,000 / 25,000 points in one run
+- **Sharp eye**: guess on the first try; **Mind reader**: 10 first-try guesses
+- **Lightning**: guess correctly in under 5 seconds
+- **Clutch**: guess correctly with your last (6th) guess
+
+...plus one secret achievement.
+
 ### Data
 
 - Pokemon images come from [PokeAPI](https://pokeapi.co); the clue data in `PokedexData` was

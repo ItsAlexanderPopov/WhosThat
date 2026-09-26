@@ -37,6 +37,20 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
         iconResourceMap.put("i15poke", R.drawable.i15poke);
         iconResourceMap.put("i20poke", R.drawable.i20poke);
         iconResourceMap.put("secret", R.drawable.secret);
+        iconResourceMap.put("ach_score1_lol", R.drawable.ach_score1_lol);
+        iconResourceMap.put("ach_score2_lol", R.drawable.ach_score2_lol);
+        iconResourceMap.put("ach_score3_lol", R.drawable.ach_score3_lol);
+        iconResourceMap.put("ach_firsttry_lol", R.drawable.ach_firsttry_lol);
+        iconResourceMap.put("ach_firsttry10_lol", R.drawable.ach_firsttry10_lol);
+        iconResourceMap.put("ach_lightning_lol", R.drawable.ach_lightning_lol);
+        iconResourceMap.put("ach_clutch_lol", R.drawable.ach_clutch_lol);
+        iconResourceMap.put("ach_score1_poke", R.drawable.ach_score1_poke);
+        iconResourceMap.put("ach_score2_poke", R.drawable.ach_score2_poke);
+        iconResourceMap.put("ach_score3_poke", R.drawable.ach_score3_poke);
+        iconResourceMap.put("ach_firsttry_poke", R.drawable.ach_firsttry_poke);
+        iconResourceMap.put("ach_firsttry10_poke", R.drawable.ach_firsttry10_poke);
+        iconResourceMap.put("ach_lightning_poke", R.drawable.ach_lightning_poke);
+        iconResourceMap.put("ach_clutch_poke", R.drawable.ach_clutch_poke);
         iconResourceMap.put("next", R.drawable.next);
     }
 
@@ -51,12 +65,7 @@ public class AchievementAdapter extends RecyclerView.Adapter<AchievementAdapter.
         AchievementModel achievementModel = achievementModels.get(position);
         holder.descriptionView.setText(achievementModel.getDescription());
 
-        String iconName = achievementModel.getIconName();
-        if (achievementModel.getGameType().equals("secret")) {
-            iconName = achievementModel.isUnlocked() ? "next" : "secret";
-        }
-
-        Integer resourceId = iconResourceMap.get(iconName);
+        Integer resourceId = iconResourceMap.get(achievementModel.getIconName());
         if (resourceId != null) {
             holder.iconView.setImageResource(resourceId);
         } else {

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Achievement icon "ach_clutch_lol", generated in the style of the other achievement icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="210"
+    android:viewportHeight="210">
+    <path
+        android:pathData="M30,0 H180 A30,30 0 0 1 210,30 V180 A30,30 0 0 1 180,210 H30 A30,30 0 0 1 0,180 V30 A30,30 0 0 1 30,0 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M64,30 H146 V44 H64 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M64,142 H146 V156 H64 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M76,44 H134 C134,74 113,82 113,93 C113,104 134,112 134,142 H76 C76,112 97,104 97,93 C97,82 76,74 76,44 Z"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M88,58 L122,58 C118,70 108,76 105,84 C102,76 92,70 88,58 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M105,86 V124"
+        android:strokeColor="#FFD95A"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M84,136 C90,120 120,120 126,136 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M105,170 L113,183 L105,198 L97,183 Z"
+        android:fillColor="#C89B3C" />
+    <path
+        android:pathData="M95,175 L76,170 L85,183 L96,187 Z"
+        android:fillColor="#C89B3C" />
+    <path
+        android:pathData="M115,175 L134,170 L125,183 L114,187 Z"
+        android:fillColor="#C89B3C" />
+</vector>

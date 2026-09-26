@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Achievement icon "ach_lightning_poke", generated in the style of the other achievement icons. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="210"
+    android:viewportHeight="210">
+    <path
+        android:pathData="M30,0 H180 A30,30 0 0 1 210,30 V180 A30,30 0 0 1 180,210 H30 A30,30 0 0 1 0,180 V30 A30,30 0 0 1 30,0 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M122,24 L64,108 L100,108 L84,164 L148,76 L112,76 L132,24 Z"
+        android:fillColor="#FFD95A" />
+    <path
+        android:pathData="M90,184 a15,15 0 1,0 30,0 a15,15 0 1,0 -30,0 z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M90,184 a15,15 0 0,1 30,0 z"
+        android:fillColor="#E3350D" />
+    <path
+        android:pathData="M90,182 H120 V186 H90 Z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M99,184 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0 z"
+        android:fillColor="#000000" />
+    <path
+        android:pathData="M101.5,184 a3.5,3.5 0 1,0 7.0,0 a3.5,3.5 0 1,0 -7.0,0 z"
+        android:fillColor="#FFFFFF" />
+</vector>

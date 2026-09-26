@@ -28,9 +28,11 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.whosthat.GameMode;
 import com.example.whosthat.HighScoreManager;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
+import com.example.whosthat.achievements.AchievementNotifier;
 import com.example.whosthat.game.GameBoardUi;
 import com.example.whosthat.game.GuessOutcome;
 import com.example.whosthat.game.Round;
@@ -117,7 +119,7 @@ public class PokemonPage extends AppCompatActivity {
     private void setupObservers() {
         viewModel.getCurrentSpriteUrl().observe(this, this::loadImage);
         viewModel.getStreakCounter().observe(this, gameUi::setStreak);
-        viewModel.getScore().observe(this, score -> gameUi.setScore(score, highScoreManager.getBestScorePokemon()));
+        viewModel.getScore().observe(this, score -> gameUi.setScore(score, highScoreManager.getBestScore(GameMode.POKEMON)));
         viewModel.getRound().observe(this, gameUi::bindRound);
         viewModel.getIsLoading().observe(this, this::updateLoadingState);
         viewModel.getErrorMessage().observe(this, this::showError);
@@ -172,7 +174,7 @@ public class PokemonPage extends AppCompatActivity {
         if (enteredName.equalsIgnoreCase("next")) {
             GuessOutcome outcome = viewModel.skip();
             if (outcome.type == GuessOutcome.Type.LOST) {
-                highScoreManager.unlockSecretAchievement();
+                AchievementNotifier.recordAndNotify(this, highScoreManager, highScoreManager::unlockSecretAchievement);
                 Toast.makeText(this, "Skipped! It was " + outcome.answer + ".", Toast.LENGTH_SHORT).show();
                 revealPokemon();
             }
@@ -196,8 +198,8 @@ public class PokemonPage extends AppCompatActivity {
                 Toast.makeText(this, "Correct! It's " + outcome.answer + "!\n" + outcome.points.describe(),
                         Toast.LENGTH_LONG).show();
                 Integer streak = viewModel.getStreakCounter().getValue();
-                highScoreManager.updateHighStreakPokemon(streak != null ? streak : 0);
-                highScoreManager.updateBestScorePokemon(outcome.runScore);
+                AchievementNotifier.recordAndNotify(this, highScoreManager, () -> highScoreManager.recordRoundWon(
+                        GameMode.POKEMON, streak != null ? streak : 0, outcome.runScore, outcome.points));
                 revealPokemon();
                 break;
             case LOST:
