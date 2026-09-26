@@ -4,10 +4,18 @@
     <string name="lol_title_screen">WHO\'S THAT CHAMPION</string>
     <string name="achievementModels">Achievements</string>
     <string name="zero">0</string>
-    <string name="three">3</string>
     <string name="enter_champion_name">Enter Champion name</string>
     <string name="confirm">Confirm</string>
     <string name="whos_that_champion">Who\'s that Champion?</string>
     <string name="enter_pokemon_name">Enter Pokemon name</string>
     <string name="whos_that_pokemon">Who\'s that Pokemon?</string>
+    <string name="hints_title">Hints</string>
+    <string name="hints_subtitle">Tap a hint to reveal it. Hints cost points.</string>
+    <string name="guesses_title">Guesses</string>
+    <string name="guesses_empty">Wrong guesses show how close you were:\ngreen = match, orange = partial, red = no match, ↑↓ = answer is higher/lower.</string>
+    <string name="score_format">%1$d pts</string>
+    <string name="best_format">Best %1$d</string>
+    <string name="timer_format">⏱ %1$ds · worth %2$d pts</string>
+    <string name="timer_idle">⏱ —</string>
+    <string name="guesses_left_format">%1$d/%2$d</string>
 </resources>

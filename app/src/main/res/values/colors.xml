@@ -7,4 +7,8 @@
     <color name="black">#FF010A13</color>
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#FF005A82</color>
+    <color name="clue_correct">#FF2E7D32</color>
+    <color name="clue_partial">#FFE08600</color>
+    <color name="clue_wrong">#FFC62828</color>
+    <color name="clue_unknown">#FF5F6368</color>
 </resources>

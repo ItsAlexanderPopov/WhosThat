@@ -8,6 +8,8 @@ public class HighScoreManager {
     private static final String KEY_STREAK_POKE = "HighStreakPokemon";
     private static final String KEY_STREAK_LOL = "HighStreakLeagueOfLegends";
     private static final String KEY_SECRET_ACHIEVEMENT = "SecretAchievement";
+    private static final String KEY_BEST_SCORE_POKE = "BestScorePokemon";
+    private static final String KEY_BEST_SCORE_LOL = "BestScoreLeagueOfLegends";
 
     private SharedPreferences prefs;
 
@@ -57,5 +59,25 @@ public class HighScoreManager {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(KEY_STREAK_LOL, streak);
         editor.apply();
+    }
+
+    public int getBestScorePokemon() {
+        return prefs.getInt(KEY_BEST_SCORE_POKE, 0);
+    }
+
+    public int getBestScoreLeagueOfLegends() {
+        return prefs.getInt(KEY_BEST_SCORE_LOL, 0);
+    }
+
+    public void updateBestScorePokemon(int score) {
+        if (score > getBestScorePokemon()) {
+            prefs.edit().putInt(KEY_BEST_SCORE_POKE, score).apply();
+        }
+    }
+
+    public void updateBestScoreLeagueOfLegends(int score) {
+        if (score > getBestScoreLeagueOfLegends()) {
+            prefs.edit().putInt(KEY_BEST_SCORE_LOL, score).apply();
+        }
     }
 }

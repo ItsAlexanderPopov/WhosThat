@@ -13,7 +13,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -29,31 +28,46 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.example.whosthat.HighScoreManager;
 import com.example.whosthat.MainActivity;
 import com.example.whosthat.R;
-import com.example.whosthat.HighScoreManager;
+import com.example.whosthat.game.GameBoardUi;
+import com.example.whosthat.game.GuessOutcome;
+import com.example.whosthat.game.Round;
+import com.example.whosthat.game.Scoring;
 
 import java.util.List;
 
 public class PokemonPage extends AppCompatActivity {
     private static final int REVEAL_DURATION = 3000;
+    private static final int TIMER_TICK_MS = 500;
+
     private PokemonViewModel viewModel;
     private ImageView imagePokemon;
     private AutoCompleteTextView inputPokemon;
     private Button buttonConfirmPokemon;
     private ProgressBar loadingIndicator;
     private NestedScrollView contentContainer;
-    private TextView streakCounterTextView;
     private Handler handler;
     private HighScoreManager highScoreManager;
-    // True after a reveal until the next Pokemon arrives, so the old answer can't be guessed again
-    private boolean awaitingNextPokemon = false;
+    private GameBoardUi<PokemonProfile> gameUi;
+    // True while the answer is shown, before the next Pokemon is requested
+    private boolean revealPending = false;
+
+    private final Runnable timerTick = new Runnable() {
+        @Override
+        public void run() {
+            gameUi.updateTimer(viewModel.currentElapsedMs(), viewModel.currentPotential());
+            handler.postDelayed(this, TIMER_TICK_MS);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pokemon);
         highScoreManager = new HighScoreManager(this);
+        handler = new Handler(Looper.getMainLooper());
 
         viewModel = new ViewModelProvider(this, new PokemonViewModelFactory(PokemonRetrofitClient.getPokeApiService()))
                 .get(PokemonViewModel.class);
@@ -64,8 +78,12 @@ public class PokemonPage extends AppCompatActivity {
         setupObservers();
         setupBackNavigation();
 
-        handler = new Handler(Looper.getMainLooper());
-        // The first Pokemon is fetched in onResume if the main menu hasn't preloaded one
+        // Recreated (e.g. rotated) while the previous answer was being shown: move on to the next one
+        Round<PokemonProfile> round = viewModel.getRound().getValue();
+        if (savedInstanceState != null && round != null && !round.isPlaying()) {
+            viewModel.fetchRandomPokemon();
+        }
+        // Otherwise the first Pokemon is fetched in onResume if the main menu hasn't preloaded one
     }
 
     private void initializeViews() {
@@ -74,7 +92,7 @@ public class PokemonPage extends AppCompatActivity {
         buttonConfirmPokemon = findViewById(R.id.button_confirm_pokemon);
         loadingIndicator = findViewById(R.id.loading_indicator);
         contentContainer = findViewById(R.id.content_container);
-        streakCounterTextView = findViewById(R.id.streak_counter);
+        gameUi = new GameBoardUi<>(this, this::onHintClicked);
 
         buttonConfirmPokemon.setOnClickListener(v -> confirmPokemon());
     }
@@ -98,7 +116,9 @@ public class PokemonPage extends AppCompatActivity {
 
     private void setupObservers() {
         viewModel.getCurrentSpriteUrl().observe(this, this::loadImage);
-        viewModel.getStreakCounter().observe(this, this::updateStreakCounter);
+        viewModel.getStreakCounter().observe(this, gameUi::setStreak);
+        viewModel.getScore().observe(this, score -> gameUi.setScore(score, highScoreManager.getBestScorePokemon()));
+        viewModel.getRound().observe(this, gameUi::bindRound);
         viewModel.getIsLoading().observe(this, this::updateLoadingState);
         viewModel.getErrorMessage().observe(this, this::showError);
     }
@@ -115,19 +135,21 @@ public class PokemonPage extends AppCompatActivity {
 
     private void loadImage(@Nullable String url) {
         if (url != null && !url.isEmpty()) {
-            awaitingNextPokemon = false;
             Glide.with(this)
                     .load(url)
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
                             Toast.makeText(PokemonPage.this, "Failed to load image", Toast.LENGTH_SHORT).show();
+                            // The clues still work without the picture
+                            viewModel.onPokemonShown();
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
                             applyColorFilter();
+                            viewModel.onPokemonShown();
                             return false;
                         }
                     })
@@ -136,66 +158,91 @@ public class PokemonPage extends AppCompatActivity {
     }
 
     private void confirmPokemon() {
-        String enteredName = inputPokemon.getText().toString().trim();
-        if (awaitingNextPokemon) {
+        Round<PokemonProfile> round = viewModel.getRound().getValue();
+        if (round == null || !round.isPlaying()) {
             // Loading the next Pokemon failed earlier; treat the button as a retry
-            viewModel.fetchRandomPokemon();
-            return;
-        }
-        // delete this in production
-        if(enteredName.equalsIgnoreCase("next")){
-            String currentName = viewModel.getCurrentPokemonName().getValue();
-            if (currentName != null) {
-                String displayName = PokeList.getDisplayName(currentName);
-                Toast.makeText(this, "It was " + displayName + "!", Toast.LENGTH_SHORT).show();
-                // Skipping ends the streak, otherwise "next" could farm streak achievements
-                viewModel.resetStreak();
-                revealPokemon();
-                highScoreManager.unlockSecretAchievement();
+            if (!revealPending) {
+                viewModel.fetchRandomPokemon();
             }
             return;
         }
 
-        if (!PokeList.isGen1Pokemon(enteredName)) {
-            Toast.makeText(this, "Not Gen-1 Pokemon Name", Toast.LENGTH_SHORT).show();
+        String enteredName = inputPokemon.getText().toString().trim();
+        // delete this in production
+        if (enteredName.equalsIgnoreCase("next")) {
+            GuessOutcome outcome = viewModel.skip();
+            if (outcome.type == GuessOutcome.Type.LOST) {
+                highScoreManager.unlockSecretAchievement();
+                Toast.makeText(this, "Skipped! It was " + outcome.answer + ".", Toast.LENGTH_SHORT).show();
+                revealPokemon();
+            }
             return;
         }
 
-        boolean isCorrect = viewModel.checkGuess(enteredName);
-        if (isCorrect) {
-            String currentName = viewModel.getCurrentPokemonName().getValue();
-            String displayName = (currentName != null) ? PokeList.getDisplayName(currentName) : enteredName;
-            Toast.makeText(this, "Correct! It's " + displayName + "!", Toast.LENGTH_SHORT).show();
-            Integer currentStreakValue = viewModel.getStreakCounter().getValue();
-            int streak = (currentStreakValue != null) ? currentStreakValue : 0;
-            highScoreManager.updateHighStreakPokemon(streak);
-            revealPokemon();
-        } else {
-            Toast.makeText(this, "Wrong! Try again.", Toast.LENGTH_SHORT).show();
+        GuessOutcome outcome = viewModel.submitGuess(enteredName);
+        switch (outcome.type) {
+            case INVALID:
+                Toast.makeText(this, "Not a Gen-1 Pokemon name", Toast.LENGTH_SHORT).show();
+                break;
+            case DUPLICATE:
+                Toast.makeText(this, "You already guessed that one", Toast.LENGTH_SHORT).show();
+                break;
+            case WRONG:
+                Toast.makeText(this, "Wrong! -" + Scoring.WRONG_GUESS_PENALTY + " pts, "
+                        + outcome.guessesLeft + " guesses left", Toast.LENGTH_SHORT).show();
+                inputPokemon.setText("");
+                break;
+            case WON:
+                Toast.makeText(this, "Correct! It's " + outcome.answer + "!\n" + outcome.points.describe(),
+                        Toast.LENGTH_LONG).show();
+                Integer streak = viewModel.getStreakCounter().getValue();
+                highScoreManager.updateHighStreakPokemon(streak != null ? streak : 0);
+                highScoreManager.updateBestScorePokemon(outcome.runScore);
+                revealPokemon();
+                break;
+            case LOST:
+                Toast.makeText(this, "Out of guesses! It was " + outcome.answer + ".", Toast.LENGTH_LONG).show();
+                revealPokemon();
+                break;
+            case NOT_READY:
+                break;
+        }
+    }
+
+    private void onHintClicked(int index) {
+        String value = viewModel.revealHint(index);
+        if (value == null) {
+            return;
+        }
+        Round<PokemonProfile> round = viewModel.getRound().getValue();
+        if (round != null) {
+            int cost = round.getHints().get(index).getCost();
+            Toast.makeText(this, "-" + cost + " pts", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void revealPokemon() {
-        awaitingNextPokemon = true;
+        revealPending = true;
         imagePokemon.setColorFilter(null);
         buttonConfirmPokemon.setEnabled(false);
         inputPokemon.setEnabled(false);
 
         handler.postDelayed(() -> {
-            viewModel.fetchRandomPokemon();
+            revealPending = false;
             buttonConfirmPokemon.setEnabled(true);
             inputPokemon.setEnabled(true);
             inputPokemon.setText("");
+            viewModel.fetchRandomPokemon();
         }, REVEAL_DURATION);
     }
 
-    private void updateStreakCounter(int streak) {
-        streakCounterTextView.setText(String.valueOf(streak));
-    }
-
     private void updateLoadingState(boolean isLoading) {
-        loadingIndicator.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        contentContainer.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+        // Only hide the game for the very first load; later loads keep the board visible
+        boolean firstLoad = isLoading && viewModel.getCurrentSpriteUrl().getValue() == null;
+        loadingIndicator.setVisibility(firstLoad ? View.VISIBLE : View.GONE);
+        contentContainer.setVisibility(firstLoad ? View.GONE : View.VISIBLE);
+        buttonConfirmPokemon.setEnabled(!isLoading && !revealPending);
+        inputPokemon.setEnabled(!isLoading && !revealPending);
     }
 
     private void showError(String errorMessage) {
@@ -231,9 +278,18 @@ public class PokemonPage extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        viewModel.resumeClock();
+        handler.post(timerTick);
         if (viewModel.getCurrentSpriteUrl().getValue() == null) {
             viewModel.fetchRandomPokemon();
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        viewModel.pauseClock();
+        handler.removeCallbacks(timerTick);
     }
 
     @Override

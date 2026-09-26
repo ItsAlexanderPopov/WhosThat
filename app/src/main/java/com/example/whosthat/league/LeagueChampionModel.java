@@ -14,8 +14,19 @@ public class LeagueChampionModel {
         @SerializedName("name")
         private String name;
 
+        // e.g. "the Nine-Tailed Fox"
+        @SerializedName("title")
+        private String title;
+
+        // Resource bar, e.g. "Mana", "Energy", "None", "Fury"
+        @SerializedName("partype")
+        private String partype;
+
         @SerializedName("image")
         private Image image;
+
+        @SerializedName("stats")
+        private Stats stats;
 
         public ChampionData() {
         }
@@ -37,6 +48,27 @@ public class LeagueChampionModel {
 
         public Image getImage() {
             return image;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getPartype() {
+            return partype;
+        }
+
+        public Stats getStats() {
+            return stats;
+        }
+    }
+
+    public static class Stats {
+        @SerializedName("attackrange")
+        private double attackRange;
+
+        public double getAttackRange() {
+            return attackRange;
         }
     }
 
